@@ -40,12 +40,12 @@ namespace MeetingPlanner
             services.AddSingleton<MainWindow>();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+/*        protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
-        }
+        }*/
     }
 }

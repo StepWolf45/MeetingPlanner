@@ -9,7 +9,7 @@ namespace MeetingPlanner.Services
         {
             //Database.SetInitializer(new CreateDatabaseIfNotExists<DatabaseService>()); //Создает БД, если ее нет
             //Если хотите миграции, раскомментируйте следующую строку:
-            //Database.SetInitializer(new MigrateDatabaseToLatestVersion<DatabaseService, Migrations.Configuration>());
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<MeetingPlanner.Services.DatabaseService, Migrations.Configuration>());
         }
 
         public DbSet<User> Users { get; set; }
