@@ -6,29 +6,54 @@ using System.Windows;
 
 namespace MeetingPlanner.ViewModels
 {
-    readonly AuthenticationService _authenticationService;
-
-    public LoginViewModel(AuthenticationService authenticationService)
+    public class LoginViewModel : ObservableObject
     {
-        _authenticationService = authenticationService;
-        LoginCommand = new RelayCommand(Login);
-    }
-
-    public IRelayCommand LoginCommand { get; }
-
-    private void Login()
-    {
-        User? user = _authenticationService.AuthenticateUser(Username, Password);
-
-        if (user != null)
+        private string _username;
+        public string Username
         {
-            // Успешная аутентификация
-            MessageBox.Show("Login successful!");
-            //TODO: Перейти на другую страницу
+            get => _username;
+            set => SetProperty(ref _username, value);
         }
-        else
+
+        private string _password;
+        public string Password
         {
-            ErrorMessage = "Invalid username or password.";
+            get => _password;
+            set => SetProperty(ref _password, value);
+        }
+
+        private string _errorMessage;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
+
+        private readonly AuthenticationService _authenticationService;
+
+        public LoginViewModel(AuthenticationService authenticationService)
+        {
+            _authenticationService = authenticationService;
+            LoginCommand = new RelayCommand(Login);
+        }
+
+        public IRelayCommand LoginCommand { get; }
+
+        private void Login()
+        {
+            User user = _authenticationService.AuthenticateUser(Username, Password);
+
+            if (user != null)
+            {
+                // Успешная аутентификация
+                MessageBox.Show("Login successful!");
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                mainWindow?.ShowHomeView();
+            }
+            else
+            {
+                ErrorMessage = "Invalid username or password.";
+            }
         }
     }
 }

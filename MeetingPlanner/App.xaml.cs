@@ -19,13 +19,7 @@ namespace MeetingPlanner
         public App()
         {
             ServiceCollection services = new ServiceCollection();
-            ConfigureServices(Transient<LoginViewModel>();
-            services.AddTransient<RegisterViewModel>();
-
-            services.AddTransient<LoginView>();
-            services.AddTransient<RegisterView>();
-            services.AddSingleton<MainWindow>();
-
+            ConfigureServices(services);
             _serviceProvider = services.BuildServiceProvider();
         }
 
@@ -42,9 +36,8 @@ namespace MeetingPlanner
             // Views
             services.AddTransient<LoginView>();
             services.AddTransient<RegisterView>();
+            services.AddTransient<HomeView>();
             services.AddSingleton<MainWindow>();
-
-            _serviceProvider = services.BuildServiceProvider();
         }
 
         protected override void OnStartup(StartupEventArgs e)

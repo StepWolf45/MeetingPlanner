@@ -1,10 +1,11 @@
 ﻿using System.Windows;
+using System.Windows.Controls; // Добавьте эту строку
 using MeetingPlanner.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MeetingPlanner.Views
 {
-    public partial class RegisterView : Window
+    public partial class RegisterView : UserControl
     {
         public RegisterView()
         {
@@ -26,6 +27,12 @@ namespace MeetingPlanner.Views
             {
                 ((RegisterViewModel)DataContext).ConfirmPassword = ((PasswordBox)sender).Password;
             }
+        }
+
+        private void GoToLogin_Click(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            mainWindow?.ShowLoginView();
         }
     }
 }

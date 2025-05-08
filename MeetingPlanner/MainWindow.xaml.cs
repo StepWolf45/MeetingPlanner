@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Windows;
-using MeetingPlanner.ViewModels;
+﻿using System.Windows;
 using MeetingPlanner.Views;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +9,22 @@ namespace MeetingPlanner
         public MainWindow()
         {
             InitializeComponent();
-            Content = App.ServiceProvider.GetRequiredService<LoginView>(); // Отображаем LoginView при запуске
+            ShowLoginView();
+        }
+
+        public void ShowLoginView()
+        {
+            MainContentControl.Content = App.ServiceProvider.GetRequiredService<LoginView>();
+        }
+
+        public void ShowRegisterView()
+        {
+            MainContentControl.Content = App.ServiceProvider.GetRequiredService<RegisterView>();
+        }
+
+        public void ShowHomeView()
+        {
+            MainContentControl.Content = App.ServiceProvider.GetRequiredService<HomeView>();
         }
     }
 }

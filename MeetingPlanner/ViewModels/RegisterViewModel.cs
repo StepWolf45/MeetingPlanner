@@ -64,7 +64,8 @@ namespace MeetingPlanner.ViewModels
             if (registrationSuccessful)
             {
                 MessageBox.Show("Registration successful!");
-                // TODO: Navigate to login page
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                mainWindow?.ShowLoginView();
             }
             else
             {

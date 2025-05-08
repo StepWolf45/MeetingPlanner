@@ -8,6 +8,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ContentControl Content="{Binding CurrentView}"/>
+        <ContentControl x:Name="MainContentControl"/>
     </Grid>
 </Window>

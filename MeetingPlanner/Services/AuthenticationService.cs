@@ -1,6 +1,5 @@
 ﻿using MeetingPlanner.Models;
 using System.Linq;
-using BCrypt.Net;
 
 namespace MeetingPlanner.Services
 {
