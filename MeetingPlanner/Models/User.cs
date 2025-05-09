@@ -15,5 +15,13 @@ namespace MeetingPlanner.Models
 
         [Required]
         public string Password { get; set; }
+
+        [MaxLength(50)]
+        public string FirstName { get; set; }
+
+        [MaxLength(50)]
+        public string LastName { get; set; }
+
+        public string AvatarPath { get; set; }
     }
 }

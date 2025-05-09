@@ -117,6 +117,7 @@
     <Compile Include="Models\User.cs" />
     <Compile Include="Services\AuthenticationService.cs" />
     <Compile Include="Services\DatabaseService.cs" />
+    <Compile Include="ViewModels\HomeViewModel.cs" />
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
     <Compile Include="Views\HomeView.xaml.cs">

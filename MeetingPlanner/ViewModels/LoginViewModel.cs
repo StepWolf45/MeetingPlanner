@@ -48,7 +48,7 @@ namespace MeetingPlanner.ViewModels
                 // Успешная аутентификация
                 MessageBox.Show("Login successful!");
                 var mainWindow = Application.Current.MainWindow as MainWindow;
-                mainWindow?.ShowHomeView();
+                mainWindow?.ShowHomeView(user);
             }
             else
             {
