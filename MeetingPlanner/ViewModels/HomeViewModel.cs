@@ -15,14 +15,22 @@ namespace MeetingPlanner.ViewModels
         public string FirstName
         {
             get => _firstName;
-            set => SetProperty(ref _firstName, value);
+            set
+            {
+                SetProperty(ref _firstName, value);
+                OnPropertyChanged(nameof(FullName));
+            }
         }
 
         private string _lastName;
         public string LastName
         {
             get => _lastName;
-            set => SetProperty(ref _lastName, value);
+            set
+            {
+                SetProperty(ref _lastName, value);
+                OnPropertyChanged(nameof(FullName));
+            }
         }
 
         private string _avatarPath;
@@ -32,9 +40,28 @@ namespace MeetingPlanner.ViewModels
             set => SetProperty(ref _avatarPath, value);
         }
 
-        public HomeViewModel(DatabaseService db)
+        private string _email;
+        public string Email
+        {
+            get => _email;
+            set => SetProperty(ref _email, value);
+        }
+
+        private string _location;
+        public string Location
+        {
+            get => _location;
+            set => SetProperty(ref _location, value);
+        }
+
+        public string FullName => $"{FirstName} {LastName}";
+
+        public ContactsViewModel ContactsViewModel { get; }
+
+        public HomeViewModel(DatabaseService db, ContactsViewModel contactsViewModel)
         {
             _db = db;
+            ContactsViewModel = contactsViewModel;
             SaveChangesCommand = new RelayCommand(SaveChanges);
             LogoutCommand = new RelayCommand(Logout);
         }
@@ -45,6 +72,7 @@ namespace MeetingPlanner.ViewModels
             FirstName = _currentUser.FirstName;
             LastName = _currentUser.LastName;
             AvatarPath = _currentUser.AvatarPath;
+            ContactsViewModel.SetCurrentUser(currentUser);
         }
 
         public IRelayCommand SaveChangesCommand { get; }
@@ -61,6 +89,7 @@ namespace MeetingPlanner.ViewModels
             _currentUser.FirstName = FirstName;
             _currentUser.LastName = LastName;
             _currentUser.AvatarPath = AvatarPath;
+
 
             _db.SaveChanges();
 

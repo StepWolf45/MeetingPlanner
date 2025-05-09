@@ -9,43 +9,33 @@ namespace MeetingPlanner
 {
     public partial class App : Application
     {
-        private static ServiceProvider _serviceProvider;
+        public static IServiceProvider ServiceProvider { get; private set; }
 
-        public static ServiceProvider ServiceProvider
+        protected override void OnStartup(StartupEventArgs e)
         {
-            get { return _serviceProvider; }
-        }
+            base.OnStartup(e);
 
-        public App()
-        {
-            ServiceCollection services = new ServiceCollection();
-            ConfigureServices(services);
-            _serviceProvider = services.BuildServiceProvider();
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
+            ServiceProvider = serviceCollection.BuildServiceProvider();
+/*
+            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
+            mainWindow.Show();*/
         }
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // Сервисы
+            services.AddSingleton<MainWindow>();
             services.AddSingleton<DatabaseService>();
             services.AddSingleton<AuthenticationService>();
-
-            // ViewModels
             services.AddTransient<LoginViewModel>();
+            services.AddTransient<HomeViewModel>();
+            services.AddTransient<ContactsViewModel>();
             services.AddTransient<RegisterViewModel>();
-
-            // Views
             services.AddTransient<LoginView>();
-            services.AddTransient<RegisterView>();
             services.AddTransient<HomeView>();
-            services.AddSingleton<MainWindow>();
+            services.AddTransient<ContactsView>();
+            services.AddTransient<RegisterView>();
         }
-
-/*        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
-
-            var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
-        }*/
     }
 }

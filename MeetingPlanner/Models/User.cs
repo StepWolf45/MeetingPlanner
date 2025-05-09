@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MeetingPlanner.Models
@@ -23,5 +24,30 @@ namespace MeetingPlanner.Models
         public string LastName { get; set; }
 
         public string AvatarPath { get; set; }
+
+        public virtual ICollection<FriendRequest> SentFriendRequests { get; set; }
+        public virtual ICollection<FriendRequest> ReceivedFriendRequests { get; set; }
+        public virtual ICollection<User> Friends { get; set; }
+    }
+
+    public class FriendRequest
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        [Required]
+        public int SenderId { get; set; }
+
+        [Required]
+        public int ReceiverId { get; set; }
+
+        public bool IsAccepted { get; set; }
+
+        [ForeignKey("SenderId")]
+        public virtual User Sender { get; set; }
+
+        [ForeignKey("ReceiverId")]
+        public virtual User Receiver { get; set; }
     }
 }

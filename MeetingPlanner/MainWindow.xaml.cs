@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using MeetingPlanner.Views;
 using MeetingPlanner.Models;
+using MeetingPlanner.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MeetingPlanner
@@ -25,8 +26,10 @@ namespace MeetingPlanner
 
         public void ShowHomeView(User currentUser)
         {
+            var homeViewModel = App.ServiceProvider.GetRequiredService<HomeViewModel>();
+            homeViewModel.SetCurrentUser(currentUser);
             var homeView = App.ServiceProvider.GetRequiredService<HomeView>();
-            homeView.SetCurrentUser(currentUser);
+            homeView.DataContext = homeViewModel;
             MainContentControl.Content = homeView;
         }
     }

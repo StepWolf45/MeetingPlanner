@@ -11,5 +11,6 @@ namespace MeetingPlanner.Services
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<FriendRequest> FriendRequests { get; set; }
     }
 }
