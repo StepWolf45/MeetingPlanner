@@ -5,35 +5,73 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:MeetingPlanner.Views"
              xmlns:vm="clr-namespace:MeetingPlanner.ViewModels"
-             mc:Ignorable="d"
-             d:DesignHeight="250" d:DesignWidth="300">
+             mc:Ignorable="d" 
+             Height="600" Width="900" >
 
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid Margin="0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.25*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.Effect>
+            <DropShadowEffect BlurRadius="30" ShadowDepth="1" Opacity="0.4"/>
+        </Grid.Effect>
+        <Border Background="#6a7eee" ClipToBounds="True">
 
-        <TextBlock Text="Login" FontSize="20" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+            <Grid>
+                <StackPanel Margin="0 120 0 0" VerticalAlignment="Top">
+                    <TextBlock FontWeight="Bold" FontSize="35" Foreground="White" TextAlignment="Center" Text="Добро пожаловать !" Height="57"/>
+                    <TextBlock FontWeight="Light" FontSize="25" Foreground="White" TextAlignment="Center" Text="Войдите в"/>
+                    <TextBlock FontWeight="Light" FontSize="25" Foreground="White" TextAlignment="Center" Text="MeetingPlanner"/>
 
-        <StackPanel Grid.Row="1">
-            <Label Content="Username:"/>
-            <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
-        </StackPanel>
+                </StackPanel>
 
-        <StackPanel Grid.Row="2">
-            <Label Content="Password:"/>
-            <PasswordBox x:Name="PasswordBox" PasswordChanged="PasswordBox_PasswordChanged"/>
-        </StackPanel>
+                <Ellipse Width="500" Height="500" VerticalAlignment="Bottom"
+                         Fill="#80c0ff" Margin="50 0 0 -200" Opacity="0.6"/>
+                <Ellipse Width="300" Height="300" VerticalAlignment="Bottom"
+                         Fill="#83c2ff" Margin="-450 0 0 30" Opacity="0.3"/>
+                <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"
+                         Fill="#84c3ff" Margin="-320 0 0 -120" Opacity="0.3"/>
+                <Ellipse Width="250" Height="250" VerticalAlignment="Bottom"
+                         Fill="#81c2ff" Margin="-380 0 0 -120" />
+                <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"
+                         Fill="#87c5ff" Margin="280 0 0 -70" Opacity="0.8"/>
 
-        <TextBlock Grid.Row="3" Text="{Binding ErrorMessage}" Foreground="Red" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+            </Grid>
+        </Border>
+        <Border Grid.Column="1" Background="White" CornerRadius="0 10 10 0">
+            <Grid Margin="60 0 60 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="45"/>
+                    <RowDefinition Height="373*"/>
+                    <RowDefinition Height="182*"/>
+                </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-            <Button Content="Login" Command="{Binding LoginCommand}" Margin="0,0,10,0" />
-            <Button Content="Go to Register" Click="GoToRegister_Click" />
-        </StackPanel>
+                <StackPanel Grid.Row="1" Margin="0,100.2,0,8.6">
+                    <Border Background="#80c0ff" Width="320" CornerRadius="5" Height="40" Margin="6" Opacity="0.7">
+                        <TextBox Background="Transparent" BorderThickness="0" Width="300" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
+                    </Border>
+
+                    <Border Background="#80c0ff" Width="320" CornerRadius="5" Height="40" Margin="6" Opacity="0.7">
+                        <PasswordBox x:Name="PasswordBox" PasswordChanged="PasswordBox_PasswordChanged" Background="Transparent" BorderThickness="0" Width="300" VerticalAlignment="Center"/>
+
+                    </Border>
+
+                </StackPanel>
+                <Border VerticalAlignment="Top" Grid.Row="2" Background="#6a7eee" Height="50" CornerRadius="10" Margin="65,2.4,65,0">
+                    <Button Content="Войти" Command="{Binding LoginCommand}" Background="Transparent" Margin="5" Foreground="White" FontSize="23" BorderThickness="0" />
+
+                </Border>
+                <Border VerticalAlignment="Center" Grid.Row="2" Background="Gray" Height="50" CornerRadius="10" Margin="65,67.4,65,65">
+                    <Button Content="Регистрация" Click="GoToRegister_Click" Background="Transparent" Margin="5" Foreground="White" FontSize="23" BorderThickness="0" />
+
+
+                </Border>
+
+            </Grid>
+
+        </Border>
     </Grid>
 </UserControl>
+    
+    

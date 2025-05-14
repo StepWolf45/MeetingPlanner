@@ -3,10 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="200"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -36,6 +39,20 @@
                         <TextBlock Text="{Binding Sender.Username}" VerticalAlignment="Center"/>
                         <Button Content="Accept" Command="{Binding DataContext.AcceptFriendRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="10,0,0,0"/>
                         <Button Content="Decline" Command="{Binding DataContext.DeclineFriendRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <ListBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" ItemsSource="{Binding Friends}" Margin="10">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="{Binding AvatarPath}" Width="50" Height="50" Margin="0,0,10,0"/>
+                        <StackPanel>
+                            <TextBlock Text="{Binding FirstName}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Username}" Foreground="Gray"/>
+                        </StackPanel>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

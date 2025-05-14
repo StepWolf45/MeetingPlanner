@@ -41,11 +41,16 @@ namespace MeetingPlanner.ViewModels
 
         private void Login()
         {
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Username and password are required.";
+                return;
+            }
+
             User user = _authenticationService.AuthenticateUser(Username, Password);
 
             if (user != null)
             {
-                // Успешная аутентификация
                 MessageBox.Show("Login successful!");
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ShowHomeView(user);

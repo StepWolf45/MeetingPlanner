@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Services;
 using System.Windows;
+using System.Linq;
 
 namespace MeetingPlanner.ViewModels
 {
@@ -47,7 +48,7 @@ namespace MeetingPlanner.ViewModels
 
         private void Register()
         {
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password) || string.IsNullOrEmpty(ConfirmPassword))
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword))
             {
                 ErrorMessage = "All fields are required.";
                 return;
@@ -56,6 +57,18 @@ namespace MeetingPlanner.ViewModels
             if (Password != ConfirmPassword)
             {
                 ErrorMessage = "Passwords do not match.";
+                return;
+            }
+
+            if (Password.Length < 5 || Password.Length > 10)
+            {
+                ErrorMessage = "Password must be between 5 and 10 characters.";
+                return;
+            }
+
+            if (!Password.Any(char.IsDigit) || !Password.Any(char.IsLetter))
+            {
+                ErrorMessage = "Password must contain both letters and numbers.";
                 return;
             }
 

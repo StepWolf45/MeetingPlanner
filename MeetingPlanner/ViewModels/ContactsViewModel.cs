@@ -134,12 +134,20 @@ namespace MeetingPlanner.ViewModels
 
         private void LoadFriends()
         {
-            Friends = new ObservableCollection<User>(_currentUser.Friends);
+            Friends = _currentUser.Friends != null
+                ? new ObservableCollection<User>(_currentUser.Friends)
+                : new ObservableCollection<User>();
         }
 
         private void LoadPendingRequests()
         {
-            PendingRequests = new ObservableCollection<FriendRequest>(_db.FriendRequests.Where(fr => fr.ReceiverId == _currentUser.Id && !fr.IsAccepted));
+            var requests = _db.FriendRequests
+                .Where(fr => fr.ReceiverId == _currentUser.Id && !fr.IsAccepted)
+                .ToList();
+
+            PendingRequests = requests != null
+                ? new ObservableCollection<FriendRequest>(requests)
+                : new ObservableCollection<FriendRequest>();
         }
     }
 }
