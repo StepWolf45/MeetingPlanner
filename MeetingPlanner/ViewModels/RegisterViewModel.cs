@@ -50,25 +50,25 @@ namespace MeetingPlanner.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword))
             {
-                ErrorMessage = "All fields are required.";
+                ErrorMessage = "Необходимо заполнить все поля";
                 return;
             }
 
             if (Password != ConfirmPassword)
             {
-                ErrorMessage = "Passwords do not match.";
+                ErrorMessage = "Пароли не совпадают";
                 return;
             }
 
             if (Password.Length < 5 || Password.Length > 10)
             {
-                ErrorMessage = "Password must be between 5 and 10 characters.";
+                ErrorMessage = "Пароль должен находится в диапозоне от 5 до 10 символов";
                 return;
             }
 
             if (!Password.Any(char.IsDigit) || !Password.Any(char.IsLetter))
             {
-                ErrorMessage = "Password must contain both letters and numbers.";
+                ErrorMessage = "Пароль должен содержать цифры и буквы";
                 return;
             }
 
@@ -76,13 +76,12 @@ namespace MeetingPlanner.ViewModels
 
             if (registrationSuccessful)
             {
-                MessageBox.Show("Registration successful!");
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ShowLoginView();
             }
             else
             {
-                ErrorMessage = "Username already exists.";
+                ErrorMessage = "Такой логин уже существует";
             }
         }
     }

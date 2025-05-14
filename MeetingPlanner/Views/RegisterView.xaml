@@ -3,27 +3,86 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:MeetingPlanner.Views"
-             xmlns:vm="clr-namespace:MeetingPlanner.ViewModels"
              mc:Ignorable="d"
-             Height="600" Width="900" >
+             Height="600" Width="900">
+
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ButtonBaseColor" Color="#6a7eee"/>
+        <SolidColorBrush x:Key="ButtonHoverColor" Color="#5a6ede"/>
+        <SolidColorBrush x:Key="SecondaryButtonColor" Color="#8a9efe"/>
+
+        <Style TargetType="Button" x:Key="AuthButtonStyle">
+            <Setter Property="Background" Value="{StaticResource ButtonBaseColor}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" 
+                                Background="{TemplateBinding Background}" 
+                                CornerRadius="5"
+                                RenderTransformOrigin="0.5,0.5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Border.RenderTransform>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" 
+                                                            Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                            To="1.03" Duration="0:0:0.1"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" 
+                                                            Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                            To="1.03" Duration="0:0:0.1"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="border" 
+                                                            Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                            To="1" Duration="0:0:0.2"/>
+                                            <DoubleAnimation Storyboard.TargetName="border" 
+                                                            Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                            To="1" Duration="0:0:0.2"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="1.25*"/>
         </Grid.ColumnDefinitions>
+
+        <!-- Левая часть с графикой -->
         <Grid.Effect>
             <DropShadowEffect BlurRadius="30" ShadowDepth="1" Opacity="0.4"/>
         </Grid.Effect>
         <Border Background="#6a7eee" ClipToBounds="True">
-
             <Grid>
                 <StackPanel Margin="0 120 0 0" VerticalAlignment="Top">
                     <TextBlock FontWeight="Bold" FontSize="39" Foreground="White" TextAlignment="Center" Text="Регистрация" Height="57"/>
                     <TextBlock FontWeight="Light" FontSize="25" Foreground="White" TextAlignment="Center" Text="Создайте аккаунт в"/>
                     <TextBlock FontWeight="Light" FontSize="25" Foreground="White" TextAlignment="Center" Text="MeetingPlanner"/>
-
                 </StackPanel>
 
                 <Ellipse Width="500" Height="500" VerticalAlignment="Bottom"
@@ -36,51 +95,146 @@
                          Fill="#81c2ff" Margin="-380 0 0 -120" />
                 <Ellipse Width="400" Height="400" VerticalAlignment="Bottom"
                          Fill="#87c5ff" Margin="280 0 0 -70" Opacity="0.8"/>
-
             </Grid>
         </Border>
+
+        <!-- Правая часть с формой -->
         <Border Grid.Column="1" Background="White" CornerRadius="0 10 10 0">
             <Grid Margin="60 0 60 0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="45"/>
-                    <RowDefinition Height="373*"/>
-                    <RowDefinition Height="182*"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="1" Margin="0,100.2,0,8.6">
-
-                    <Border Background="#80c0ff" Width="320" CornerRadius="5" Height="40" Margin="6" Opacity="0.7">
-                        <TextBox Background="Transparent" BorderThickness="0" Width="300" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Orientation="Horizontal">
-                        <Border Background="#80c0ff" Width="290" CornerRadius="5" Height="40" Margin="6,6,0,6" Opacity="0.7">
-                            <PasswordBox x:Name="PasswordBox" PasswordChanged="PasswordBox_PasswordChanged" Background="Transparent" BorderThickness="0" Width="270" VerticalAlignment="Center"/>
+                <!-- Поля ввода -->
+                <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Width="320" Margin="30,68,30,255" Height="257">
+                    <!-- Логин -->
+                    <StackPanel Margin="0,0,0,15">
+                        <Label Content="Имя пользователя" 
+                               Foreground="#6a7eee" 
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Padding="0,0,0,5"/>
+                        <Border Background="#80c0ff" CornerRadius="5" Height="40" Opacity="0.7">
+                            <TextBox Background="Transparent" 
+                                     BorderThickness="0" 
+                                     Foreground="#2d2d2d"
+                                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
+                                     VerticalAlignment="Center"
+                                     Padding="10"
+                                     FontSize="14"/>
                         </Border>
-                        <Button Content="?" 
-        ToolTip="Password requirements:&#x0a;- 5 to 10 characters&#x0a;- At least 1 letter&#x0a;- At least 1 digit"
-        Width="20" Height="20" Margin="0,0,10,0" Foreground="Gray"/>
-
                     </StackPanel>
 
-                    <Border Background="#80c0ff" Width="320" CornerRadius="5" Height="40" Margin="6" Opacity="0.7">
-                        <PasswordBox x:Name="ConfirmPasswordBox" PasswordChanged="ConfirmPasswordBox_PasswordChanged" Background="Transparent" BorderThickness="0" Width="300" VerticalAlignment="Center"/>
+                    <!-- Пароль -->
+                    <StackPanel Margin="0,15,0,15">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Пароль" 
+                                   Foreground="#6a7eee" 
+                                   FontWeight="Bold"
+                                   FontSize="14"
+                                   Padding="0,0,5,5"/>
+                            <Button Content="?" 
+                                    ToolTip="Требования к паролю:&#x0a;- 5-10 символов&#x0a;- Минимум 1 буква&#x0a;- Минимум 1 цифра"
+                                    Width="20" 
+                                    Height="20" 
+                                    Foreground="Gray"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    FontWeight="Bold"
+                                    Cursor="Help"/>
+                        </StackPanel>
+                        <Border Background="#80c0ff" CornerRadius="5" Height="40" Opacity="0.7">
+                            <PasswordBox x:Name="PasswordBox" 
+                                         PasswordChanged="PasswordBox_PasswordChanged" 
+                                         Background="Transparent" 
+                                         Foreground="#2d2d2d"
+                                         BorderThickness="0" 
+                                         VerticalAlignment="Center"
+                                         Padding="10"
+                                         FontSize="14"/>
+                        </Border>
+                    </StackPanel>
 
-                    </Border>
-
+                    <!-- Подтверждение пароля -->
+                    <StackPanel Margin="0,15,0,0">
+                        <Label Content="Подтвердите пароль" 
+                               Foreground="#6a7eee" 
+                               FontWeight="Bold"
+                               FontSize="14"
+                               Padding="0,0,0,5"/>
+                        <Border Background="#80c0ff" CornerRadius="5" Height="40" Opacity="0.7">
+                            <PasswordBox x:Name="ConfirmPasswordBox" 
+                                         PasswordChanged="ConfirmPasswordBox_PasswordChanged" 
+                                         Background="Transparent" 
+                                         Foreground="#2d2d2d"
+                                         BorderThickness="0" 
+                                         VerticalAlignment="Center"
+                                         Padding="10"
+                                         FontSize="14"/>
+                        </Border>
+                    </StackPanel>
                 </StackPanel>
-                <Border VerticalAlignment="Top" Grid.Row="2" Background="#6a7eee" Height="50" CornerRadius="10" Margin="65,2.4,65,0">
-                    <Button Content="Зарегистрировать" Command="{Binding RegisterCommand}" Background="Transparent" Margin="5" Foreground="White" FontSize="23" BorderThickness="0" />
 
+                <!-- Кнопки -->
+                <StackPanel Grid.Row="1" 
+                            VerticalAlignment="Center" 
+                            HorizontalAlignment="Center"
+                            Orientation="Horizontal"
+                            Width="355"
+                            Height="45" Margin="25,356,0,179">
+                    <Button Content="Зарегистрировать" 
+                            Command="{Binding RegisterCommand}" 
+                            Style="{StaticResource AuthButtonStyle}"
+                            Width="170"/>
+
+                    <Button Content="Вернуться" 
+                            Click="GoToLogin_Click" 
+                            Style="{StaticResource AuthButtonStyle}"
+                            Background="{StaticResource SecondaryButtonColor}"
+                            Width="140"/>
+                </StackPanel>
+
+                <!-- Сообщение об ошибке -->
+                <Border x:Name="ErrorBorder" 
+                        Grid.Row="1"
+                        Background="#FF4444" 
+                        CornerRadius="5"
+                        Padding="15"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Center"
+                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
+                        RenderTransformOrigin="0.5,0.5" 
+                        Width="320"
+                        Margin="25,436,25,0" Height="64">
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                               Foreground="White"
+                               TextWrapping="Wrap"
+                               FontWeight="Bold"
+                               FontSize="14"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <Border.RenderTransform>
+                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                    </Border.RenderTransform>
+
+                    <Border.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX"
+                                                     From="0.8" To="1.0" Duration="0:0:0.3"/>
+                                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY"
+                                                     From="0.8" To="1.0" Duration="0:0:0.3"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Border.Triggers>
                 </Border>
-                <Border VerticalAlignment="Center" Grid.Row="2" Background="Gray" Height="50" CornerRadius="10" Margin="65,67.4,65,65">
-                    <Button Content="Перейти ко входу" Click="GoToLogin_Click" Background="Transparent" Margin="5" Foreground="White" FontSize="23" BorderThickness="0" />
-
-
-                </Border>
-
             </Grid>
-
         </Border>
-
     </Grid>
 </UserControl>

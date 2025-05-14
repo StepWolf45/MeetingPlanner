@@ -5,57 +5,189 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
+
+    <UserControl.Resources>
+        <Style TargetType="Button" x:Key="ContactButtonStyle">
+            <Setter Property="Background" Value="#6a7eee"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="Padding" Value="10,0"/>
+
+        </Style>
+
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="#FAFAFA"/>
+            <Setter Property="BorderBrush" Value="#80c0ff"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="5"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#6495ED" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="250"/>
         </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-            <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" Width="200" Margin="0,0,10,0"/>
-            <Button Content="Search" Command="{Binding SearchCommand}" Background="LightBlue" Foreground="White" BorderBrush="LightBlue" BorderThickness="1" Padding="10"/>
-        </StackPanel>
+        <!-- Левая колонка с поиском и заявками -->
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <ListBox Grid.Row="1" ItemsSource="{Binding SearchResults}" Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
+            <!-- Блок поиска -->
+            <Border Grid.Row="0" Background="#F0F5FF" CornerRadius="5" Margin="10,10,10,5" Padding="10">
+                <StackPanel>
+                    <Label Content="Поиск друзей" 
+                           Foreground="#6a7eee" 
+                           FontWeight="Bold"
+                           FontSize="14"
+                           Padding="0,0,0,5"/>
+
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Username}" VerticalAlignment="Center"/>
-                        <Button Content="Send Friend Request" Command="{Binding DataContext.SendFriendRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="10,0,0,0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                        <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
+                                 Width="200" 
+                                 Margin="0,0,10,0"
+                                 BorderBrush="#80c0ff"
+                                 BorderThickness="1"
+                                 Padding="5"/>
 
-        <ListBox Grid.Row="2" ItemsSource="{Binding PendingRequests}" Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Sender.Username}" VerticalAlignment="Center"/>
-                        <Button Content="Accept" Command="{Binding DataContext.AcceptFriendRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="10,0,0,0"/>
-                        <Button Content="Decline" Command="{Binding DataContext.DeclineFriendRequestCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                        <Button Content="Найти" 
+                                Command="{Binding SearchCommand}" 
+                                Style="{StaticResource ContactButtonStyle}"/>
                     </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                </StackPanel>
+            </Border>
 
-        <ListBox Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" ItemsSource="{Binding Friends}" Margin="10">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="{Binding AvatarPath}" Width="50" Height="50" Margin="0,0,10,0"/>
-                        <StackPanel>
-                            <TextBlock Text="{Binding FirstName}" FontWeight="Bold"/>
-                            <TextBlock Text="{Binding Username}" Foreground="Gray"/>
-                        </StackPanel>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <!-- Результаты поиска -->
+            <Border Grid.Row="1" Background="#F0F5FF" CornerRadius="5" Margin="10,5,10,5" Padding="10">
+                <StackPanel>
+                    <Label Content="Найденные пользователи" 
+                           Foreground="#6a7eee" 
+                           FontWeight="Bold"
+                           FontSize="14"
+                           Padding="0,0,0,5"/>
+
+                    <ListBox ItemsSource="{Binding SearchResults}" Height="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <Image Source="{Binding AvatarPath}" 
+                                           Width="40" 
+                                           Height="40" 
+                                           Margin="0,0,10,0"/>
+
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Username}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding FirstName}" Foreground="#555"/>
+                                    </StackPanel>
+
+                                    <Button Content="Добавить" 
+                                            Command="{Binding DataContext.SendFriendRequestCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ContactButtonStyle}"
+                                            Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+
+            <!-- Входящие заявки -->
+            <Border Grid.Row="2" Background="#F0F5FF" CornerRadius="5" Margin="10,5,10,10" Padding="10">
+                <StackPanel>
+                    <Label Content="Входящие заявки" 
+                           Foreground="#6a7eee" 
+                           FontWeight="Bold"
+                           FontSize="14"
+                           Padding="0,0,0,5"/>
+
+                    <ListBox ItemsSource="{Binding PendingRequests}" Height="150">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <Image Source="{Binding Sender.AvatarPath}" 
+                                           Width="40" 
+                                           Height="40" 
+                                           Margin="0,0,10,0"/>
+
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Sender.Username}" FontWeight="Bold"/>
+                                        <TextBlock Text="хочет добавить вас в друзья" Foreground="#555"/>
+                                    </StackPanel>
+
+                                    <Button Content="Принять" 
+                                            Command="{Binding DataContext.AcceptFriendRequestCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ContactButtonStyle}"
+                                            Margin="10,0,5,0"/>
+
+                                    <Button Content="Отклонить" 
+                                            Command="{Binding DataContext.DeclineFriendRequestCommand, 
+                                                    RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource ContactButtonStyle}"
+                                            Background="#FF6B6B"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Правая колонка с друзьями -->
+        <Border Grid.Column="1" Background="#F0F5FF" CornerRadius="5" Margin="10,10,10,10" Padding="10">
+            <StackPanel>
+                <Label Content="Ваши друзья" 
+                       Foreground="#6a7eee" 
+                       FontWeight="Bold"
+                       FontSize="14"
+                       Padding="0,0,0,5"/>
+
+                <ListBox ItemsSource="{Binding Friends}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <Image Source="{Binding AvatarPath}" 
+                                       Width="50" 
+                                       Height="50" 
+                                       Margin="0,0,10,0"/>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding FirstName}" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Username}" Foreground="#555"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Декоративные элементы -->
+                <Ellipse Width="100" Height="100" 
+                         Fill="#80c0ff" 
+                         HorizontalAlignment="Right" 
+                         VerticalAlignment="Bottom"
+                         Margin="0,10,0,0"
+                         Opacity="0.3"/>
+                <Ellipse Width="50" Height="50" 
+                         Fill="#80c0ff" 
+                         HorizontalAlignment="Right" 
+                         VerticalAlignment="Bottom"
+                         Margin="100,10,20,0"
+                         Opacity="0.3"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>

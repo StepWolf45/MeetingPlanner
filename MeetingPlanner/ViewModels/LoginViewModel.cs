@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Models;
 using MeetingPlanner.Services;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace MeetingPlanner.ViewModels
@@ -21,12 +22,23 @@ namespace MeetingPlanner.ViewModels
             get => _password;
             set => SetProperty(ref _password, value);
         }
-
         private string _errorMessage;
         public string ErrorMessage
         {
             get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
+            set
+            {
+                SetProperty(ref _errorMessage, value);
+
+                // Автоматическое скрытие через 3 секунды
+                if (!string.IsNullOrEmpty(value))
+                {
+                    Task.Delay(3500).ContinueWith(_ =>
+                    {
+                        ErrorMessage = string.Empty;
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                }
+            }
         }
 
         private readonly AuthenticationService _authenticationService;
@@ -43,7 +55,7 @@ namespace MeetingPlanner.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                ErrorMessage = "Username and password are required.";
+                ErrorMessage = "Поля логин и пароль обязательны для заполнения";
                 return;
             }
 
@@ -51,13 +63,13 @@ namespace MeetingPlanner.ViewModels
 
             if (user != null)
             {
-                MessageBox.Show("Login successful!");
+
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ShowHomeView(user);
             }
             else
             {
-                ErrorMessage = "Invalid username or password.";
+                ErrorMessage = "Неверный логин или пароль";
             }
         }
     }
