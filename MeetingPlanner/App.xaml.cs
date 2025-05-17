@@ -18,9 +18,6 @@ namespace MeetingPlanner
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
-/*
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();*/
         }
 
         private void ConfigureServices(IServiceCollection services)
@@ -28,16 +25,16 @@ namespace MeetingPlanner
             services.AddSingleton<MainWindow>();
             services.AddSingleton<DatabaseService>();
             services.AddSingleton<AuthenticationService>();
-            services.AddTransient<CalendarViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<HomeViewModel>();
             services.AddTransient<ContactsViewModel>();
+            services.AddTransient<CalendarViewModel>();
             services.AddTransient<RegisterViewModel>();
             services.AddTransient<LoginView>();
             services.AddTransient<HomeView>();
             services.AddTransient<ContactsView>();
-            services.AddTransient<RegisterView>();
             services.AddTransient<CalendarView>();
+            services.AddTransient<RegisterView>();
         }
     }
 }

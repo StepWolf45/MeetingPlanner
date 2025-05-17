@@ -40,7 +40,6 @@ namespace MeetingPlanner.ViewModels
             set => SetProperty(ref _avatarPath, value);
         }
 
-
         public string FullName => $"{FirstName} {LastName}";
 
         private CalendarViewModel _calendarViewModel;
@@ -84,7 +83,6 @@ namespace MeetingPlanner.ViewModels
             _currentUser.FirstName = FirstName;
             _currentUser.LastName = LastName;
             _currentUser.AvatarPath = AvatarPath;
-
 
             _db.SaveChanges();
 

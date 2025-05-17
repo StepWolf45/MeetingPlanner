@@ -5,6 +5,7 @@ using MeetingPlanner.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -17,17 +18,27 @@ namespace MeetingPlanner.ViewModels
         private User _currentUser;
         private DateTime _selectedDate;
         private bool _isEventFormVisible;
+        private bool _isEventDetailsVisible;
+        private User _selectedFriend;
+        private CalendarEvent _selectedEvent;
 
         public ObservableCollection<CalendarEvent> Events { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<User> Friends { get; } = new ObservableCollection<User>();
         public ObservableCollection<User> SelectedAttendees { get; } = new ObservableCollection<User>();
+        public ObservableCollection<TimeSpan> TimeSlots { get; } = new ObservableCollection<TimeSpan>();
 
         public CalendarEvent NewEvent { get; } = new CalendarEvent();
 
         public DateTime SelectedDate
         {
             get => _selectedDate;
-            set => SetProperty(ref _selectedDate, value);
+            set
+            {
+                if (SetProperty(ref _selectedDate, value))
+                {
+                    OnPropertyChanged(nameof(EventsForSelectedDate));
+                }
+            }
         }
 
         public bool IsEventFormVisible
@@ -36,10 +47,57 @@ namespace MeetingPlanner.ViewModels
             set => SetProperty(ref _isEventFormVisible, value);
         }
 
+        public bool IsEventDetailsVisible
+        {
+            get => _isEventDetailsVisible;
+            set => SetProperty(ref _isEventDetailsVisible, value);
+        }
+
+        public User SelectedFriend
+        {
+            get => _selectedFriend;
+            set => SetProperty(ref _selectedFriend, value);
+        }
+
+        public CalendarEvent SelectedEvent
+        {
+            get => _selectedEvent;
+            set => SetProperty(ref _selectedEvent, value);
+        }
+
+        public DateTime StartDate
+        {
+            get => NewEvent.StartTime.Date;
+            set => NewEvent.StartTime = value.Date + NewEvent.StartTime.TimeOfDay;
+        }
+
+        public TimeSpan StartTime
+        {
+            get => NewEvent.StartTime.TimeOfDay;
+            set => NewEvent.StartTime = NewEvent.StartTime.Date + value;
+        }
+
+        public DateTime EndDate
+        {
+            get => NewEvent.EndTime.Date;
+            set => NewEvent.EndTime = value.Date + NewEvent.EndTime.TimeOfDay;
+        }
+
+        public TimeSpan EndTime
+        {
+            get => NewEvent.EndTime.TimeOfDay;
+            set => NewEvent.EndTime = NewEvent.EndTime.Date + value;
+        }
+
+        public IEnumerable<CalendarEvent> EventsForSelectedDate =>
+            GetEventsForDate(SelectedDate);
+
         public ICommand CreateEventCommand { get; }
         public ICommand DateSelectedCommand { get; }
         public ICommand AddAttendeeCommand { get; }
         public ICommand RemoveAttendeeCommand { get; }
+        public ICommand ViewEventCommand { get; }
+        public ICommand CloseEventDetailsCommand { get; }
 
         public CalendarViewModel(DatabaseService db)
         {
@@ -47,14 +105,27 @@ namespace MeetingPlanner.ViewModels
 
             CreateEventCommand = new RelayCommand(CreateEvent);
             DateSelectedCommand = new RelayCommand<DateTime?>(OnDateSelected);
-            AddAttendeeCommand = new RelayCommand<User>(AddAttendee);
+            AddAttendeeCommand = new RelayCommand(AddAttendee);
             RemoveAttendeeCommand = new RelayCommand<User>(RemoveAttendee);
+            ViewEventCommand = new RelayCommand<DateTime?>(ViewEventsForDate);
+            CloseEventDetailsCommand = new RelayCommand(() => IsEventDetailsVisible = false);
+            SelectedDate = DateTime.Today;
+            InitializeTimeSlots();
+        }
+
+        private void InitializeTimeSlots()
+        {
+            for (var hour = 0; hour < 24; hour++)
+            {
+                TimeSlots.Add(new TimeSpan(hour, 0, 0));
+                TimeSlots.Add(new TimeSpan(hour, 30, 0));
+            }
         }
 
         public void SetCurrentUser(User currentUser)
         {
             _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-            _currentUser.Friends ??= new List<User>();
+            _currentUser.Friends = _currentUser.Friends ?? new List<User>();
             LoadEvents();
             LoadFriends();
         }
@@ -67,11 +138,35 @@ namespace MeetingPlanner.ViewModels
                 NewEvent.StartTime = date.Value;
                 NewEvent.EndTime = date.Value.AddHours(1);
                 IsEventFormVisible = true;
+                IsEventDetailsVisible = false;
             }
             else
             {
                 IsEventFormVisible = false;
             }
+        }
+
+        public void ViewEventsForDate(DateTime? date)
+        {
+            if (!date.HasValue) return;
+
+            var events = GetEventsForDate(date.Value).ToList();
+            if (events.Any())
+            {
+                SelectedEvent = events.First();
+                IsEventDetailsVisible = true;
+                IsEventFormVisible = false;
+            }
+        }
+
+        public bool HasEventsOnDate(DateTime date)
+        {
+            return Events.Any(e => e.StartTime.Date <= date.Date && e.EndTime.Date >= date.Date);
+        }
+
+        public IEnumerable<CalendarEvent> GetEventsForDate(DateTime date)
+        {
+            return Events.Where(e => e.StartTime.Date <= date.Date && e.EndTime.Date >= date.Date);
         }
 
         private void LoadEvents()
@@ -88,6 +183,8 @@ namespace MeetingPlanner.ViewModels
             {
                 Events.Add(ev);
             }
+            OnPropertyChanged(nameof(Events));
+            OnPropertyChanged(nameof(EventsForSelectedDate));
         }
 
         private void LoadFriends()
@@ -107,16 +204,30 @@ namespace MeetingPlanner.ViewModels
                 return;
             }
 
-            NewEvent.Organizer = _currentUser;
-            NewEvent.Attendees = SelectedAttendees.ToList();
+            if (NewEvent.EndTime <= NewEvent.StartTime)
+            {
+                MessageBox.Show("End time must be after start time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
-            _db.CalendarEvents.Add(NewEvent);
-            _db.SaveChanges();
+            try
+            {
+                NewEvent.Organizer = _currentUser;
+                NewEvent.Attendees = SelectedAttendees.ToList();
 
-            Events.Add(NewEvent);
-            ResetEventForm();
+                _db.CalendarEvents.Add(NewEvent);
+                _db.SaveChanges();
 
-            MessageBox.Show("Event created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                Events.Add(NewEvent);
+                ResetEventForm();
+                LoadEvents();
+
+                MessageBox.Show("Event created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error creating event: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ResetEventForm()
@@ -129,11 +240,11 @@ namespace MeetingPlanner.ViewModels
             SelectedAttendees.Clear();
         }
 
-        private void AddAttendee(User friend)
+        private void AddAttendee()
         {
-            if (friend != null && !SelectedAttendees.Contains(friend))
+            if (SelectedFriend != null && !SelectedAttendees.Contains(SelectedFriend))
             {
-                SelectedAttendees.Add(friend);
+                SelectedAttendees.Add(SelectedFriend);
             }
         }
 

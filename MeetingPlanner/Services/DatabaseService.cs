@@ -16,10 +16,17 @@ namespace MeetingPlanner.Services
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CalendarEvent>()
-                .HasRequired(e => e.Organizer)
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Friends)
                 .WithMany()
-                .WillCascadeOnDelete(false);
+                .Map(m =>
+                {
+                    m.ToTable("UserFriends");
+                    m.MapLeftKey("UserId");
+                    m.MapRightKey("FriendId");
+                });
 
             modelBuilder.Entity<CalendarEvent>()
                 .HasMany(e => e.Attendees)

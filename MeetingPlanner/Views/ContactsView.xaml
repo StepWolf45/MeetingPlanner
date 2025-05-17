@@ -29,7 +29,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#6495ED" >
+    <Grid Background="#3F888F">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="250"/>

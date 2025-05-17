@@ -24,7 +24,6 @@ namespace MeetingPlanner.Models
         public string LastName { get; set; }
 
         public string AvatarPath { get; set; }
-        public string FullName => $"{FirstName} {LastName}";
         public virtual ICollection<FriendRequest> SentFriendRequests { get; set; }
         public virtual ICollection<FriendRequest> ReceivedFriendRequests { get; set; }
         public virtual ICollection<User> Friends { get; set; }
