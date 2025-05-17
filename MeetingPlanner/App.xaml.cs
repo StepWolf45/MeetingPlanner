@@ -28,6 +28,7 @@ namespace MeetingPlanner
             services.AddSingleton<MainWindow>();
             services.AddSingleton<DatabaseService>();
             services.AddSingleton<AuthenticationService>();
+            services.AddTransient<CalendarViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<HomeViewModel>();
             services.AddTransient<ContactsViewModel>();
@@ -36,6 +37,7 @@ namespace MeetingPlanner
             services.AddTransient<HomeView>();
             services.AddTransient<ContactsView>();
             services.AddTransient<RegisterView>();
+            services.AddTransient<CalendarView>();
         }
     }
 }

@@ -113,12 +113,7 @@
 
             <!-- Вкладка календаря -->
             <TabItem Header="Календарь">
-                <Border Background="#F0F5FF" CornerRadius="10" Margin="10">
-                    <Calendar HorizontalAlignment="Stretch" 
-                              VerticalAlignment="Stretch" 
-                              Margin="10"
-                              BorderThickness="0"/>
-                </Border>
+                <views:CalendarView DataContext="{Binding CalendarViewModel}"/>
             </TabItem>
 
             <!-- Вкладка контактов -->

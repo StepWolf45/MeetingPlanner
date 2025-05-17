@@ -40,28 +40,22 @@ namespace MeetingPlanner.ViewModels
             set => SetProperty(ref _avatarPath, value);
         }
 
-        private string _email;
-        public string Email
-        {
-            get => _email;
-            set => SetProperty(ref _email, value);
-        }
-
-        private string _location;
-        public string Location
-        {
-            get => _location;
-            set => SetProperty(ref _location, value);
-        }
 
         public string FullName => $"{FirstName} {LastName}";
 
+        private CalendarViewModel _calendarViewModel;
+        public CalendarViewModel CalendarViewModel
+        {
+            get => _calendarViewModel;
+            set => SetProperty(ref _calendarViewModel, value);
+        }
         public ContactsViewModel ContactsViewModel { get; }
 
-        public HomeViewModel(DatabaseService db, ContactsViewModel contactsViewModel)
+        public HomeViewModel(DatabaseService db, ContactsViewModel contactsViewModel, CalendarViewModel calendarViewModel)
         {
             _db = db;
             ContactsViewModel = contactsViewModel;
+            CalendarViewModel = calendarViewModel;
             SaveChangesCommand = new RelayCommand(SaveChanges);
             LogoutCommand = new RelayCommand(Logout);
         }
@@ -73,6 +67,7 @@ namespace MeetingPlanner.ViewModels
             LastName = _currentUser.LastName;
             AvatarPath = _currentUser.AvatarPath;
             ContactsViewModel.SetCurrentUser(currentUser);
+            CalendarViewModel.SetCurrentUser(currentUser);
         }
 
         public IRelayCommand SaveChangesCommand { get; }
