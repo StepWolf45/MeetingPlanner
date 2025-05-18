@@ -9,11 +9,14 @@
              d:DesignHeight="550" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <DropShadowEffect x:Key="ShadowEffect" BlurRadius="10" ShadowDepth="3" Opacity="0.2"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:HasEventConverter x:Key="HasEventConverter"/>
         <converters:TimeSpanConverter x:Key="TimeSpanConverter"/>
         <Style TargetType="Button" x:Key="PrimaryButton">
-            <Setter Property="Background" Value="#6a7eee"/>
+            <Setter Property="Background" Value="#003153"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="Padding" Value="10 5"/>
             <Setter Property="Margin" Value="5"/>
@@ -54,7 +57,7 @@
                         <DataTrigger Value="True">
                             <DataTrigger.Binding>
                                 <MultiBinding Converter="{StaticResource HasEventConverter}">
-                                    <Binding Path="DataContext.Events" 
+                                    <Binding Path="DataContext.Events"
                                              RelativeSource="{RelativeSource AncestorType=Calendar}"/>
                                     <Binding Path="Date"/>
                                 </MultiBinding>
@@ -63,8 +66,8 @@
                             <Setter Property="ToolTip">
                                 <Setter.Value>
                                     <ToolTip>
-                                        <ItemsControl ItemsSource="{Binding DataContext.GetEventsForDate(Date), 
-                                                             RelativeSource={RelativeSource AncestorType=Calendar}}">
+                                        <ItemsControl ItemsSource="{Binding DataContext.GetEventsForDate(Date),
+                                                                 RelativeSource={RelativeSource AncestorType=Calendar}}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Margin="5">
@@ -88,8 +91,7 @@
         </Calendar>
 
         <!-- Event Form -->
-        <Border Grid.Column="1" Background="#3F888F" Padding="15"
-               Visibility="{Binding IsEventFormVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border Grid.Column="1" Background="#3F888F" Padding="15">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Text="New Event" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
@@ -140,8 +142,16 @@
 
                     <Label Content="Invite Friends"/>
                     <ComboBox ItemsSource="{Binding Friends}"
-                              SelectedItem="{Binding SelectedFriend}"
-                              DisplayMemberPath="FullName"/>
+                              SelectedItem="{Binding SelectedFriend}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Firstname}"/>
+                                    <TextBlock Text="{Binding Username}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
 
                     <Button Content="Add" Command="{Binding AddAttendeeCommand}"
                            CommandParameter="{Binding SelectedFriend}"
@@ -151,7 +161,7 @@
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding FullName}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Username}" VerticalAlignment="Center"/>
                                     <Button Content="Remove" Margin="10 0 0 0"
                                            Command="{Binding DataContext.RemoveAttendeeCommand,
                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -170,30 +180,92 @@
 
         <!-- Event Details Popup -->
         <Border Grid.ColumnSpan="2" Background="#80000000" Padding="20"
-               Visibility="{Binding IsEventDetailsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border Background="White" Padding="20" CornerRadius="5">
-                <StackPanel MinWidth="300">
-                    <TextBlock Text="Event Details" FontSize="18" FontWeight="Bold" Margin="0 0 0 10"/>
+        Visibility="{Binding IsEventDetailsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Background="White" Padding="0" CornerRadius="10" Width="400"
+            BorderThickness="1" BorderBrush="#E0E0E0"
+            Effect="{StaticResource ShadowEffect}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                    <TextBlock Text="{Binding SelectedEvent.Title}" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding SelectedEvent.Description}" Margin="0 5"/>
-                    <TextBlock Text="{Binding SelectedEvent.Location}" Margin="0 5"/>
+                    <!-- Header -->
+                    <Border Background="#6a7eee" CornerRadius="10,10,0,0" Padding="15">
+                        <TextBlock Text="{Binding SelectedDate, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"
+                          Foreground="White" FontSize="16" FontWeight="Bold"/>
+                    </Border>
 
-                    <TextBlock Text="{Binding SelectedEvent.StartTime, StringFormat='Start: {0:g}'}"/>
-                    <TextBlock Text="{Binding SelectedEvent.EndTime, StringFormat='End: {0:g}'}"/>
+                    <!-- Content -->
+                    <ScrollViewer Grid.Row="1" Padding="15" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding SelectedEvents}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="0,0,0,15" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" 
+                                              FontSize="16" FontWeight="Bold"/>
 
-                    <TextBlock Text="Attendees:" FontWeight="Bold" Margin="0 10 0 5"/>
-                    <ItemsControl ItemsSource="{Binding SelectedEvent.Attendees}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding FullName}"/>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                                            <!-- Time -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                                                <Border Background="#F5F5F5" CornerRadius="5" Padding="8">
+                                                    <TextBlock Text="{Binding StartTime, StringFormat='{}{0:HH:mm}'}" 
+                                                        FontWeight="SemiBold"/>
+                                                </Border>
+                                                <TextBlock Text=" - " VerticalAlignment="Center" Margin="5,0"/>
+                                                <Border Background="#F5F5F5" CornerRadius="5" Padding="8">
+                                                    <TextBlock Text="{Binding EndTime, StringFormat='{}{0:HH:mm}'}" 
+                                                        FontWeight="SemiBold"/>
+                                                </Border>
+                                            </StackPanel>
 
-                    <Button Content="Close" Command="{Binding CloseEventDetailsCommand}"
-                           Style="{StaticResource PrimaryButton}" Margin="0 20 0 0" HorizontalAlignment="Right"/>
-                </StackPanel>
+                                            <!-- Location -->
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding Location, Converter={StaticResource StringToVisibilityConverter}}">
+                                                <Path Data="M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z"
+                                              Fill="#6a7eee" Width="20" Height="20" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding Location}" 
+                                                  FontSize="14" VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <!-- Description -->
+                                            <TextBlock Text="{Binding Description}" 
+                                              TextWrapping="Wrap" FontSize="14" Margin="0,5,0,0"
+                                              Visibility="{Binding Description, Converter={StaticResource StringToVisibilityConverter}}"/>
+
+                                            <!-- Attendees -->
+                                            <TextBlock Text="Attendees:" FontWeight="Bold" Margin="0,5,0,0"
+                                               Visibility="{Binding Attendees.Count, Converter={StaticResource IntToVisibilityConverter}}"/>
+                                            <ItemsControl ItemsSource="{Binding Attendees}" Margin="5,0,0,0">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="#F5F5F5" CornerRadius="15" Padding="5,3" Margin="0,0,5,5">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Ellipse Width="24" Height="24" Fill="#6a7eee" Margin="0,0,5,0">
+                                                                    <Ellipse.OpacityMask>
+                                                                        <VisualBrush Visual="{Binding Icon}"/>
+                                                                    </Ellipse.OpacityMask>
+                                                                </Ellipse>
+                                                                <TextBlock Text="{Binding Username}" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!-- Footer -->
+                    <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="0,0,10,10" Padding="10">
+                        <Button Content="Close" Command="{Binding CloseEventDetailsCommand}"
+                        Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
+                        Width="100" Margin="0"/>
+                    </Border>
+                </Grid>
             </Border>
         </Border>
     </Grid>

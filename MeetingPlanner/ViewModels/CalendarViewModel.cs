@@ -5,7 +5,7 @@ using MeetingPlanner.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.Entity;
+using System.Data.Entity; // Для использования метода Include
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -17,11 +17,11 @@ namespace MeetingPlanner.ViewModels
         private readonly DatabaseService _db;
         private User _currentUser;
         private DateTime _selectedDate;
-        private bool _isEventFormVisible;
         private bool _isEventDetailsVisible;
-        private User _selectedFriend;
         private CalendarEvent _selectedEvent;
+        private User _selectedFriend;
 
+        public ObservableCollection<CalendarEvent> SelectedEvents { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<CalendarEvent> Events { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<User> Friends { get; } = new ObservableCollection<User>();
         public ObservableCollection<User> SelectedAttendees { get; } = new ObservableCollection<User>();
@@ -32,19 +32,7 @@ namespace MeetingPlanner.ViewModels
         public DateTime SelectedDate
         {
             get => _selectedDate;
-            set
-            {
-                if (SetProperty(ref _selectedDate, value))
-                {
-                    OnPropertyChanged(nameof(EventsForSelectedDate));
-                }
-            }
-        }
-
-        public bool IsEventFormVisible
-        {
-            get => _isEventFormVisible;
-            set => SetProperty(ref _isEventFormVisible, value);
+            set => SetProperty(ref _selectedDate, value);
         }
 
         public bool IsEventDetailsVisible
@@ -53,69 +41,35 @@ namespace MeetingPlanner.ViewModels
             set => SetProperty(ref _isEventDetailsVisible, value);
         }
 
-        public User SelectedFriend
-        {
-            get => _selectedFriend;
-            set => SetProperty(ref _selectedFriend, value);
-        }
-
         public CalendarEvent SelectedEvent
         {
             get => _selectedEvent;
             set => SetProperty(ref _selectedEvent, value);
         }
 
-        public DateTime StartDate
+        public User SelectedFriend
         {
-            get => NewEvent.StartTime.Date;
-            set => NewEvent.StartTime = value.Date + NewEvent.StartTime.TimeOfDay;
+            get => _selectedFriend;
+            set => SetProperty(ref _selectedFriend, value);
         }
-
-        public TimeSpan StartTime
-        {
-            get => NewEvent.StartTime.TimeOfDay;
-            set => NewEvent.StartTime = NewEvent.StartTime.Date + value;
-        }
-
-        public DateTime EndDate
-        {
-            get => NewEvent.EndTime.Date;
-            set => NewEvent.EndTime = value.Date + NewEvent.EndTime.TimeOfDay;
-        }
-
-        public TimeSpan EndTime
-        {
-            get => NewEvent.EndTime.TimeOfDay;
-            set => NewEvent.EndTime = NewEvent.EndTime.Date + value;
-        }
-
-        public IEnumerable<CalendarEvent> EventsForSelectedDate =>
-            GetEventsForDate(SelectedDate);
-
-        public ICommand CreateEventCommand { get; }
-        public ICommand DateSelectedCommand { get; }
-        public ICommand AddAttendeeCommand { get; }
-        public ICommand RemoveAttendeeCommand { get; }
-        public ICommand ViewEventCommand { get; }
-        public ICommand CloseEventDetailsCommand { get; }
 
         public CalendarViewModel(DatabaseService db)
         {
             _db = db;
+            InitializeTimeSlots();
 
             CreateEventCommand = new RelayCommand(CreateEvent);
             DateSelectedCommand = new RelayCommand<DateTime?>(OnDateSelected);
+            CloseEventDetailsCommand = new RelayCommand(CloseEventDetails);
             AddAttendeeCommand = new RelayCommand(AddAttendee);
             RemoveAttendeeCommand = new RelayCommand<User>(RemoveAttendee);
-            ViewEventCommand = new RelayCommand<DateTime?>(ViewEventsForDate);
-            CloseEventDetailsCommand = new RelayCommand(() => IsEventDetailsVisible = false);
+
             SelectedDate = DateTime.Today;
-            InitializeTimeSlots();
         }
 
         private void InitializeTimeSlots()
         {
-            for (var hour = 0; hour < 24; hour++)
+            for (var hour = 8; hour < 20; hour++)
             {
                 TimeSlots.Add(new TimeSpan(hour, 0, 0));
                 TimeSlots.Add(new TimeSpan(hour, 30, 0));
@@ -124,76 +78,39 @@ namespace MeetingPlanner.ViewModels
 
         public void SetCurrentUser(User currentUser)
         {
-            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-            _currentUser.Friends = _currentUser.Friends ?? new List<User>();
+            _currentUser = currentUser;
             LoadEvents();
             LoadFriends();
         }
 
         private void OnDateSelected(DateTime? date)
         {
-            if (date.HasValue)
+            if (!date.HasValue) return;
+
+            SelectedDate = date.Value;
+            LoadEventsForSelectedDate();
+        }
+        private void LoadEventsForSelectedDate()
+        {
+            var eventsOnDate = GetEventsForDate(SelectedDate).ToList();
+            if (eventsOnDate.Any())
             {
-                SelectedDate = date.Value;
-                NewEvent.StartTime = date.Value;
-                NewEvent.EndTime = date.Value.AddHours(1);
-                IsEventFormVisible = true;
-                IsEventDetailsVisible = false;
+                SelectedEvents.Clear();
+                foreach (var ev in eventsOnDate)
+                {
+                    SelectedEvents.Add(ev);
+                }
+                IsEventDetailsVisible = true;
             }
             else
             {
-                IsEventFormVisible = false;
+                SelectedEvents.Clear();
+                IsEventDetailsVisible = false;
             }
-        }
 
-        public void ViewEventsForDate(DateTime? date)
-        {
-            if (!date.HasValue) return;
-
-            var events = GetEventsForDate(date.Value).ToList();
-            if (events.Any())
-            {
-                SelectedEvent = events.First();
-                IsEventDetailsVisible = true;
-                IsEventFormVisible = false;
-            }
-        }
-
-        public bool HasEventsOnDate(DateTime date)
-        {
-            return Events.Any(e => e.StartTime.Date <= date.Date && e.EndTime.Date >= date.Date);
-        }
-
-        public IEnumerable<CalendarEvent> GetEventsForDate(DateTime date)
-        {
-            return Events.Where(e => e.StartTime.Date <= date.Date && e.EndTime.Date >= date.Date);
-        }
-
-        private void LoadEvents()
-        {
-            Events.Clear();
-            var events = _db.CalendarEvents
-                .Include(e => e.Organizer)
-                .Include(e => e.Attendees)
-                .Where(e => e.Organizer.Id == _currentUser.Id ||
-                           e.Attendees.Any(a => a.Id == _currentUser.Id))
-                .ToList();
-
-            foreach (var ev in events)
-            {
-                Events.Add(ev);
-            }
-            OnPropertyChanged(nameof(Events));
-            OnPropertyChanged(nameof(EventsForSelectedDate));
-        }
-
-        private void LoadFriends()
-        {
-            Friends.Clear();
-            foreach (var friend in _currentUser.Friends.Where(f => f != null))
-            {
-                Friends.Add(friend);
-            }
+            // Сбрасываем форму для нового события
+            NewEvent.StartTime = SelectedDate;
+            NewEvent.EndTime = SelectedDate.AddHours(1);
         }
 
         private void CreateEvent()
@@ -220,7 +137,6 @@ namespace MeetingPlanner.ViewModels
 
                 Events.Add(NewEvent);
                 ResetEventForm();
-                LoadEvents();
 
                 MessageBox.Show("Event created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -240,6 +156,42 @@ namespace MeetingPlanner.ViewModels
             SelectedAttendees.Clear();
         }
 
+        public IEnumerable<CalendarEvent> GetEventsForDate(DateTime date)
+        {
+            return Events.Where(e => e.StartTime.Date == date.Date)
+                        .OrderBy(e => e.StartTime);
+        }
+
+        private void LoadEvents()
+        {
+            Events.Clear();
+            var events = _db.CalendarEvents
+                .Include(e => e.Organizer)
+                .Include(e => e.Attendees)
+                .Where(e => e.Organizer.Id == _currentUser.Id ||
+                           e.Attendees.Any(a => a.Id == _currentUser.Id))
+                .ToList();
+
+            foreach (var ev in events)
+            {
+                Events.Add(ev);
+            }
+        }
+
+        private void LoadFriends()
+        {
+            Friends.Clear();
+            foreach (var friend in _currentUser.Friends.Where(f => f != null))
+            {
+                Friends.Add(friend);
+            }
+        }
+
+        private void CloseEventDetails()
+        {
+            IsEventDetailsVisible = false;
+        }
+
         private void AddAttendee()
         {
             if (SelectedFriend != null && !SelectedAttendees.Contains(SelectedFriend))
@@ -252,5 +204,11 @@ namespace MeetingPlanner.ViewModels
         {
             SelectedAttendees.Remove(attendee);
         }
+
+        public ICommand CreateEventCommand { get; }
+        public ICommand DateSelectedCommand { get; }
+        public ICommand CloseEventDetailsCommand { get; }
+        public ICommand AddAttendeeCommand { get; }
+        public ICommand RemoveAttendeeCommand { get; }
     }
 }

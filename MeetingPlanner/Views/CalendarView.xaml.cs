@@ -1,6 +1,4 @@
 ﻿using System.Windows.Controls;
-using MeetingPlanner.ViewModels;
-using System;
 
 namespace MeetingPlanner.Views
 {
@@ -10,13 +8,12 @@ namespace MeetingPlanner.Views
         {
             InitializeComponent();
         }
+
         private void Calendar_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DataContext is CalendarViewModel viewModel &&
-                (sender as Calendar)?.SelectedDate is DateTime selectedDate)
+            if (DataContext is ViewModels.CalendarViewModel viewModel)
             {
-                viewModel.DateSelectedCommand.Execute(selectedDate);
-                viewModel.ViewEventsForDate(selectedDate); // Добавьте эту строку
+                viewModel.DateSelectedCommand.Execute((sender as Calendar)?.SelectedDate);
             }
         }
     }

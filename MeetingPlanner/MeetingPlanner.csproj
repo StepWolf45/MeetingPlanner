@@ -113,6 +113,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Services\IsPastDateConverter.cs" />
     <Compile Include="Services\HasEventConverter.cs" />
     <Compile Include="Services\TimeSpanConverter.cs" />
     <Compile Include="Migrations\Configuration.cs" />

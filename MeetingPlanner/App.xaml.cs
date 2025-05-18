@@ -18,6 +18,8 @@ namespace MeetingPlanner
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
+
+
         }
 
         private void ConfigureServices(IServiceCollection services)

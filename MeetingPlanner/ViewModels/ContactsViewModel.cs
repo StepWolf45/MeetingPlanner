@@ -149,5 +149,10 @@ namespace MeetingPlanner.ViewModels
                 ? new ObservableCollection<FriendRequest>(requests)
                 : new ObservableCollection<FriendRequest>();
         }
+
+        public bool IsFriend(User user)
+        {
+            return _currentUser.Friends.Any(f => f.Id == user.Id);
+        }
     }
 }
