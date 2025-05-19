@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:services="clr-namespace:MeetingPlanner.Services"
+             xmlns:converters="clr-namespace:MeetingPlanner.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
+        <converters:FriendStatusToVisibilityConverter x:Key="FriendStatusToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <Style TargetType="Button" x:Key="ContactButtonStyle">
-            <Setter Property="Background" Value="#6a7eee"/>
+            <Setter Property="Background" Value=" #0E294B"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -22,10 +26,11 @@
 
         <Style TargetType="ListBox">
             <Setter Property="Background" Value="#FAFAFA"/>
-            <Setter Property="BorderBrush" Value="#80c0ff"/>
+            <Setter Property="BorderBrush" Value="#0E294B"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Margin" Value="10"/>
             <Setter Property="Padding" Value="5"/>
+
         </Style>
     </UserControl.Resources>
 
@@ -44,10 +49,10 @@
             </Grid.RowDefinitions>
 
             <!-- Блок поиска -->
-            <Border Grid.Row="0" Background="#F0F5FF" CornerRadius="5" Margin="10,10,10,5" Padding="10">
+            <Border Grid.Row="0" Background="#FFF" CornerRadius="5" Margin="10,10,10,5" Padding="10">
                 <StackPanel>
                     <Label Content="Поиск друзей" 
-                           Foreground="#6a7eee" 
+                           Foreground="#0E294B" 
                            FontWeight="Bold"
                            FontSize="14"
                            Padding="0,0,0,5"/>
@@ -58,6 +63,7 @@
                                  Margin="0,0,10,0"
                                  BorderBrush="#80c0ff"
                                  BorderThickness="1"
+         
                                  Padding="5"/>
 
                         <Button Content="Найти" 
@@ -71,12 +77,12 @@
             <Border Grid.Row="1" Background="#F0F5FF" CornerRadius="5" Margin="10,5,10,5" Padding="10">
                 <StackPanel>
                     <Label Content="Найденные пользователи" 
-                           Foreground="#6a7eee" 
+                           Foreground="#0E294B" 
                            FontWeight="Bold"
                            FontSize="14"
                            Padding="0,0,0,5"/>
 
-                    <ListBox ItemsSource="{Binding SearchResults}" Height="150">
+                    <ListBox ItemsSource="{Binding SearchResults}"  SelectedItem="{Binding SelectedUser}" Height="150">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="5">
@@ -85,17 +91,27 @@
                                            Height="40" 
                                            Margin="0,0,10,0"/>
 
-                                    <StackPanel VerticalAlignment="Center">
+                                    <StackPanel VerticalAlignment="Center" Width="60">
                                         <TextBlock Text="{Binding Username}" FontWeight="Bold"/>
                                         <TextBlock Text="{Binding FirstName}" Foreground="#555"/>
                                     </StackPanel>
 
-                                    <Button Content="Добавить" 
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <!-- Статус дружбы -->
+                                        <TextBlock Text="{Binding FriendStatus}"
+                                           Foreground="{Binding FriendStatusColor}"
+                                           FontWeight="Bold"
+                                           Margin="0,6,10,0"/>
+
+                                        <!-- Кнопка "Добавить" -->
+                                        <Button Content="Добавить" 
                                             Command="{Binding DataContext.SendFriendRequestCommand, 
                                                     RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                             CommandParameter="{Binding}"
                                             Style="{StaticResource ContactButtonStyle}"
-                                            Margin="10,0,0,0"/>
+                                            Visibility="{Binding FriendStatus, 
+                                                    Converter={StaticResource FriendStatusToVisibilityConverter}}"/>
+                                    </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
@@ -107,7 +123,7 @@
             <Border Grid.Row="2" Background="#F0F5FF" CornerRadius="5" Margin="10,5,10,10" Padding="10">
                 <StackPanel>
                     <Label Content="Входящие заявки" 
-                           Foreground="#6a7eee" 
+                           Foreground="#0E294B" 
                            FontWeight="Bold"
                            FontSize="14"
                            Padding="0,0,0,5"/>
@@ -151,7 +167,7 @@
         <Border Grid.Column="1" Background="#F0F5FF" CornerRadius="5" Margin="10,10,10,10" Padding="10">
             <StackPanel>
                 <Label Content="Ваши друзья" 
-                       Foreground="#6a7eee" 
+                       Foreground="#0E294B" 
                        FontWeight="Bold"
                        FontSize="14"
                        Padding="0,0,0,5"/>

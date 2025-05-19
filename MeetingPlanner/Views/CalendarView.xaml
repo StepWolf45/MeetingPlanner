@@ -88,6 +88,14 @@
                     </Style.Triggers>
                 </Style>
             </Calendar.CalendarDayButtonStyle>
+            <Calendar.LayoutTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="3" ScaleY="3"/>
+                    <SkewTransform/>
+                    <RotateTransform/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Calendar.LayoutTransform>
         </Calendar>
 
         <!-- Event Form -->

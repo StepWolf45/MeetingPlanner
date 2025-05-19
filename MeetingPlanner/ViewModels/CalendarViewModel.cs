@@ -78,7 +78,9 @@ namespace MeetingPlanner.ViewModels
 
         public void SetCurrentUser(User currentUser)
         {
-            _currentUser = currentUser;
+            _currentUser = _db.Users
+                .Include(u => u.Friends)  // Make sure to add using Microsoft.EntityFrameworkCore;
+                .FirstOrDefault(u => u.Id == currentUser.Id);
             LoadEvents();
             LoadFriends();
         }
@@ -180,6 +182,7 @@ namespace MeetingPlanner.ViewModels
 
         private void LoadFriends()
         {
+
             Friends.Clear();
             foreach (var friend in _currentUser.Friends.Where(f => f != null))
             {

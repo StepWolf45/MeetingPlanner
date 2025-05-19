@@ -31,5 +31,10 @@ namespace MeetingPlanner.Views
                 AvatarImage.Source = new BitmapImage(new Uri(viewModel.AvatarPath));
             }
         }
+
+        private void ContactsView_Loaded(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -113,6 +113,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Services\BoolToVisibilityConverter.cs" />
+    <Compile Include="Services\FriendStatusToVisibilityConverter.cs" />
     <Compile Include="Services\IsPastDateConverter.cs" />
     <Compile Include="Services\HasEventConverter.cs" />
     <Compile Include="Services\TimeSpanConverter.cs" />

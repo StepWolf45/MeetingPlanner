@@ -3,21 +3,62 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:views="clr-namespace:MeetingPlanner.Views"
-             mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             xmlns:views="clr-namespace:MeetingPlanner.Views" 
+             mc:Ignorable="d" 
+             Width="900" Height="600">
 
     <UserControl.Resources>
+        <SolidColorBrush x:Key="TabNormalBackground" Color="#0E294B"/>
+        <SolidColorBrush x:Key="TabSelectedBackground" Color="#3F888F"/>
+        <SolidColorBrush x:Key="TabMouseOverBackground" Color="#5A9DFF"/>
+        <SolidColorBrush x:Key="TabBorderColor" Color="#3F888F"/>
+        <SolidColorBrush x:Key="TabNormalForeground" Color="White"/>
+        <SolidColorBrush x:Key="TabSelectedForeground" Color="White"/>
+
+        <!-- Стиль для TabItem -->
+        <Style x:Key="CustomTabItemStyle" TargetType="{x:Type TabItem}">
+            <Setter Property="Foreground" Value="{StaticResource TabNormalForeground}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="2,0,2,0"/>
+            <Setter Property="Background" Value="{StaticResource TabNormalBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource TabBorderColor}"/>
+            <Setter Property="BorderThickness" Value="1,1,1,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type TabItem}">
+                        <Border Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4,4,0,0">
+                            <ContentPresenter x:Name="ContentSite"
+                                          ContentSource="Header"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="{StaticResource TabSelectedBackground}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TabSelectedForeground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
         <Style TargetType="Button" x:Key="PrimaryButtonStyle">
-            <Setter Property="Background" Value="#6a7eee"/>
+            <Setter Property="Background" Value="#0E294B"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Height" Value="40"/>
+            <Setter Property="Height" Value="32"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Padding" Value="15,5"/>
-            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="5"/>
         </Style>
 
         <Style TargetType="Button" x:Key="DangerButtonStyle" BasedOn="{StaticResource PrimaryButtonStyle}">
@@ -25,52 +66,49 @@
         </Style>
 
         <Style TargetType="TextBox">
-            <Setter Property="Margin" Value="0,0,0,15"/>
-            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="0,0,10,15"/>
+            <Setter Property="Padding" Value="5"/>
             <Setter Property="FontSize" Value="14"/>
-            <Setter Property="BorderBrush" Value="#80c0ff"/>
+            <Setter Property="BorderBrush" Value="#0E294B"/>
             <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="32"/>
         </Style>
     </UserControl.Resources>
 
-    <Grid Background="#3F888F">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="98*"/>
-            <RowDefinition Height="127*"/>
-        </Grid.RowDefinitions>
-        <TabControl Background="#3F888F" BorderThickness="0" Margin="0,0,0,-0.4" Grid.RowSpan="2">
+    <Grid>
+        <TabControl Background="#3F888F" BorderThickness="0" >
             <!-- Вкладка аккаунта -->
-            <TabItem Header="Аккаунт">
-                <Grid Margin="20">
+            <TabItem Header="Аккаунт" Style="{StaticResource CustomTabItemStyle}" Margin="-10,0,2.2,-0.2" >
+                <Grid Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
                     <!-- Верхняя часть с аватаром -->
-                    <Border Grid.Row="0" Background="#F0F5FF" CornerRadius="10" Padding="20">
+                    <Border Grid.Row="0" Background="#F0F5FF" CornerRadius="10" Padding="15" Margin="0,0,248.8,0.2">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image x:Name="AvatarImage" 
-                                   Width="120" 
-                                   Height="120" 
-                                   Margin="0,0,30,0" 
+                                   Width="80" 
+                                   Height="80" 
+                                   Margin="0,0,20,0" 
                                    Source="{Binding AvatarPath}"/>
 
                             <StackPanel VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                     <Label Content="Имя:" 
-                                           Foreground="#6a7eee" 
+                                           Foreground="#0E294B" 
                                            FontWeight="Bold"
-                                           MinWidth="80"/>
+                                           MinWidth="60"/>
                                     <Label Content="{Binding FirstName}" 
                                            FontSize="14"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
                                     <Label Content="Фамилия:" 
-                                           Foreground="#6a7eee" 
+                                           Foreground="#0E294B" 
                                            FontWeight="Bold"
-                                           MinWidth="80"/>
+                                           MinWidth="60"/>
                                     <Label Content="{Binding LastName}" 
                                            FontSize="14"/>
                                 </StackPanel>
@@ -78,64 +116,63 @@
                                 <Button Content="Сменить аватар" 
                                         Click="ChangeAvatarButton_Click" 
                                         Style="{StaticResource PrimaryButtonStyle}"
-                                        Margin="0,15,0,0" Width="144" Height="34"/>
+                                        Margin="0,10,0,0" 
+                                        Width="169" 
+                                        Height="31"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <!-- Нижняя часть с редактированием -->
-                    <Border Grid.Row="1" Background="#F0F5FF" CornerRadius="10" Margin="0,10,0,10.2" Padding="20">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                    <Border Grid.Row="1" Background="#F0F5FF" CornerRadius="10" Margin="0,9.6,9.8,-0.2" Padding="15">
+                        <StackPanel>
+                            <Label Content="Редактирование профиля" 
+                                   Foreground="#0E294B" 
+                                   FontWeight="Bold"
+                                   FontSize="16"
+                                   Margin="0,0,0,10"/>
 
-                            <StackPanel Grid.Column="0">
-                                <Label Content="Редактирование профиля" 
-                                       Foreground="#6a7eee" 
-                                       FontWeight="Bold"
-                                       FontSize="16"
-                                       Margin="0,0,0,0"/>
-                                <Label Content="Имя" Foreground="#555" Margin="0,0,467.2,0"/>
-                                <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Height="52" Margin="0,0,317.2,15"/>
-                                <Label Content="Фамилия" Foreground="#555" Margin="0,0,443.2,0" Height="29"/>
-                                <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Height="41" Margin="0,0,293.2,15"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                <StackPanel Width="261">
+                                    <Label Content="Имя" Foreground="#2d2d2d"/>
+                                    <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Foreground="#2d2d2d"
+                                             Width="250"/>
+                                </StackPanel>
+
+                                <StackPanel Margin="15,0,0,0">
+                                    <Label Content="Фамилия" Foreground="#2d2d2d"/>
+                                    <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}"  Foreground="#2d2d2d"
+                                             Width="250"/>
+                                </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" VerticalAlignment="Bottom" Margin="9.6,0,10,35.2">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0.2,0" Width="539" Height="44">
+
                                 <Button Content="Сохранить изменения" 
                                         Command="{Binding SaveChangesCommand}" 
                                         Style="{StaticResource PrimaryButtonStyle}"
-                                        Width="180"/>
+                                        Width="184"/>
 
-                                <Button Content="Выйти" 
+                                <Button Content="Выйти из аккаунта" 
                                         Command="{Binding LogoutCommand}" 
                                         Style="{StaticResource DangerButtonStyle}"
-                                        Margin="10,10,-0.4,0"/>
+                                        Width="152"
+                                        Margin="10,0,0,0"/>
                             </StackPanel>
-                        </Grid>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </TabItem>
 
             <!-- Вкладка календаря -->
-            <TabItem Header="Календарь">
+            <TabItem Header="Календарь" Style="{StaticResource CustomTabItemStyle}" >
                 <views:CalendarView DataContext="{Binding CalendarViewModel}"/>
             </TabItem>
 
             <!-- Вкладка контактов -->
-            <TabItem Header="Контакты">
-                <views:ContactsView DataContext="{Binding ContactsViewModel}" Margin="0,-5,-5,-2.8"/>
+            <TabItem Header="Контакты"  Style="{StaticResource CustomTabItemStyle}">
+                <views:ContactsView DataContext="{Binding ContactsViewModel}"/>
             </TabItem>
         </TabControl>
-
-        <!-- Декоративные элементы -->
-        <Ellipse Width="150" Height="150" 
-                 Fill="#80c0ff" 
-                 HorizontalAlignment="Right" 
-                 VerticalAlignment="Bottom"
-                 Margin="0,0,10,179.6"
-                 Opacity="0.2" Grid.RowSpan="2"/>
     </Grid>
 </UserControl>

@@ -7,9 +7,9 @@
              Height="600" Width="900">
 
     <UserControl.Resources>
-        <SolidColorBrush x:Key="ButtonBaseColor" Color="#6a7eee"/>
-        <SolidColorBrush x:Key="ButtonHoverColor" Color="#5a6ede"/>
-        <SolidColorBrush x:Key="SecondaryButtonColor" Color="#8a9efe"/>
+        <SolidColorBrush x:Key="ButtonBaseColor" Color=" #0E294B"/>
+        <SolidColorBrush x:Key="ButtonHoverColor" Color="#0E294B"/>
+        <SolidColorBrush x:Key="SecondaryButtonColor" Color="#555"/>
 
         <Style TargetType="Button" x:Key="AuthButtonStyle">
             <Setter Property="Background" Value="{StaticResource ButtonBaseColor}"/>
@@ -77,7 +77,7 @@
         <Grid.Effect>
             <DropShadowEffect BlurRadius="30" ShadowDepth="1" Opacity="0.4"/>
         </Grid.Effect>
-        <Border Background="#6a7eee" ClipToBounds="True">
+        <Border Background=" #0E294B" ClipToBounds="True">
             <Grid>
                 <StackPanel Margin="0 120 0 0" VerticalAlignment="Top">
                     <TextBlock FontWeight="Bold" FontSize="39" Foreground="White" TextAlignment="Center" Text="Регистрация" Height="57"/>
@@ -113,7 +113,7 @@
                     <!-- Логин -->
                     <StackPanel Margin="0,0,0,15">
                         <Label Content="Имя пользователя" 
-                               Foreground="#6a7eee" 
+                               Foreground="#0E294B" 
                                FontWeight="Bold"
                                FontSize="14"
                                Padding="0,0,0,5"/>
@@ -132,7 +132,7 @@
                     <StackPanel Margin="0,15,0,15">
                         <StackPanel Orientation="Horizontal">
                             <Label Content="Пароль" 
-                                   Foreground="#6a7eee" 
+                                   Foreground="#0E294B" 
                                    FontWeight="Bold"
                                    FontSize="14"
                                    Padding="0,0,5,5"/>
@@ -161,7 +161,7 @@
                     <!-- Подтверждение пароля -->
                     <StackPanel Margin="0,15,0,0">
                         <Label Content="Подтвердите пароль" 
-                               Foreground="#6a7eee" 
+                               Foreground="#0E294B" 
                                FontWeight="Bold"
                                FontSize="14"
                                Padding="0,0,0,5"/>
