@@ -3,14 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:services="clr-namespace:MeetingPlanner.Services"
-             xmlns:converters="clr-namespace:MeetingPlanner.Converters"
+             xmlns:Services="clr-namespace:MeetingPlanner.Services" 
+             xmlns:Converters="clr-namespace:MeetingPlanner.Converters"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
 
     <UserControl.Resources>
-        <converters:FriendStatusToVisibilityConverter x:Key="FriendStatusToVisibilityConverter"/>
+        <Converters:StringToBrushConverter x:Key="StringToBrushConverter"/>
+        <Converters:FriendStatusToVisibilityConverter x:Key="FriendStatusToVisibilityConverter"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <Style TargetType="{x:Type Popup}">
+            <Setter Property="AllowsTransparency" Value="True"/>
+            <Setter Property="FocusManager.IsFocusScope" Value="True"/>
+        </Style>
         <Style TargetType="Button" x:Key="ContactButtonStyle">
             <Setter Property="Background" Value=" #0E294B"/>
             <Setter Property="Foreground" Value="White"/>
@@ -177,14 +182,25 @@
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="5">
                                 <Image Source="{Binding AvatarPath}" 
-                                       Width="50" 
-                                       Height="50" 
-                                       Margin="0,0,10,0"/>
+                       Width="50" Height="50" 
+                       Margin="0,0,10,0"/>
 
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Text="{Binding FirstName}" FontWeight="Bold"/>
                                     <TextBlock Text="{Binding Username}" Foreground="#555"/>
                                 </StackPanel>
+
+                                <!-- Отображение тега -->
+                                <Border Background="{Binding ReceivedFriendRequests[0].TagColor, 
+                                     Converter={StaticResource StringToBrushConverter}}"
+                                    CornerRadius="3"
+                                    Padding="5,2"
+                                    VerticalAlignment="Center"
+                                    Margin="10,0,0,0">
+                                    <TextBlock Text="{Binding ReceivedFriendRequests[0].FriendTag}"
+                               Foreground="White"
+                               FontWeight="Bold"/>
+                                </Border>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
@@ -205,5 +221,54 @@
                          Opacity="0.3"/>
             </StackPanel>
         </Border>
+        <Popup 
+            x:Name="TagPopup" 
+               Placement="Center" 
+               PlacementTarget="{Binding ElementName=MainGrid}"
+               IsOpen="{Binding IsTagPopupOpen}"
+               StaysOpen="False"
+               Focusable="True">
+            <Border Background="White" 
+            Padding="15" 
+            CornerRadius="5"
+            BorderBrush="#0E294B"
+            BorderThickness="1">
+                <StackPanel>
+                    <TextBlock Text="Установите тег для друга" 
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+
+                    <TextBox x:Name="TagInputTextBox" 
+                         Text="{Binding CurrentTagText, UpdateSourceTrigger=PropertyChanged}" 
+                         Margin="0,0,0,10"
+                         MinWidth="200">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SaveFriendTagCommand}"/>
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center">
+                        <ComboBox ItemsSource="{Binding AvailableTagColors}"
+                          SelectedItem="{Binding SelectedTagColor}"
+                          Width="100"
+                          Margin="0,0,10,0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Rectangle Width="20" Height="20" 
+                                       Fill="{Binding Converter={StaticResource StringToBrushConverter}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <Button Content="Сохранить" 
+                        Command="{Binding SaveFriendTagCommand}"
+                        Style="{StaticResource ContactButtonStyle}"
+                        Width="100"
+                        IsDefault="True"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Popup>
     </Grid>
 </UserControl>

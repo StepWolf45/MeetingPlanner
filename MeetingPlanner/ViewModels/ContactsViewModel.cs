@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Models;
 using MeetingPlanner.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -58,6 +59,8 @@ namespace MeetingPlanner.ViewModels
 
         public Brush FriendStatusColor =>
             SelectedUser != null ? GetFriendStatusColor(SelectedUser) : Brushes.Black;
+
+
         public ContactsViewModel(DatabaseService db)
         {
             _db = db;
@@ -65,8 +68,19 @@ namespace MeetingPlanner.ViewModels
             SendFriendRequestCommand = new RelayCommand<User>(SendFriendRequest);
             AcceptFriendRequestCommand = new RelayCommand<FriendRequest>(AcceptFriendRequest);
             DeclineFriendRequestCommand = new RelayCommand<FriendRequest>(DeclineFriendRequest);
+            SaveFriendTagCommand = new RelayCommand(SaveFriendTag);
         }
-
+        private async void SaveFriendTag()
+        {
+            if (CurrentFriendRequest != null)
+            {
+                CurrentFriendRequest.FriendTag = CurrentTagText;
+                CurrentFriendRequest.TagColor = SelectedTagColor;
+                await _db.SaveChangesAsync();
+                IsTagPopupOpen = false;
+                LoadFriends(); // Обновляем список друзей
+            }
+        }
         public void SetCurrentUser(User currentUser)
         {
             _currentUser = currentUser;
@@ -74,6 +88,55 @@ namespace MeetingPlanner.ViewModels
             LoadPendingRequests();
         }
 
+        private bool _isTagPopupOpen;
+        public bool IsTagPopupOpen
+        {
+            get => _isTagPopupOpen;
+            set
+            {
+                SetProperty(ref _isTagPopupOpen, value);
+                if (value)
+                {
+                    // Устанавливаем значения по умолчанию
+                    CurrentTagText = string.Empty;
+                    SelectedTagColor = AvailableTagColors.FirstOrDefault();
+
+                    // Запросим установку фокуса (реализуем ниже)
+                    RequestFocus?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        public event EventHandler RequestFocus;
+
+
+        private string _currentTagText;
+        public string CurrentTagText
+        {
+            get => _currentTagText;
+            set => SetProperty(ref _currentTagText, value);
+        }
+
+        private string _selectedTagColor;
+        public string SelectedTagColor
+        {
+            get => _selectedTagColor;
+            set => SetProperty(ref _selectedTagColor, value);
+        }
+
+        public ObservableCollection<string> AvailableTagColors { get; } = new ObservableCollection<string>
+    {
+        "#FF5733", "#33FF57", "#3357FF", "#F333FF", "#33FFF3"
+    };
+
+        private FriendRequest _currentFriendRequest;
+        public FriendRequest CurrentFriendRequest
+        {
+            get => _currentFriendRequest;
+            set => SetProperty(ref _currentFriendRequest, value);
+        }
+
+        public IRelayCommand SaveFriendTagCommand { get; }
         public IRelayCommand SearchCommand { get; }
         public IRelayCommand<User> SendFriendRequestCommand { get; }
         public IRelayCommand<FriendRequest> AcceptFriendRequestCommand { get; }
@@ -158,8 +221,10 @@ namespace MeetingPlanner.ViewModels
 
         private void AcceptFriendRequest(FriendRequest request)
         {
-            request.IsAccepted = true;
-            _db.SaveChanges();
+        request.IsAccepted = true;
+        CurrentFriendRequest = request;
+        IsTagPopupOpen = true;
+        _db.SaveChanges();
 
             _currentUser.Friends.Add(request.Sender);
             request.Sender.Friends.Add(_currentUser);

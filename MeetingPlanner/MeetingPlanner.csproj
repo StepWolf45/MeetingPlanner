@@ -114,7 +114,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Services\BoolToVisibilityConverter.cs" />
-    <Compile Include="Services\FriendStatusToVisibilityConverter.cs" />
+    <Compile Include="Converters\StringToBrushConverter.cs" />
+    <Compile Include="Converters\FriendStatusToVisibilityConverter.cs" />
     <Compile Include="Services\IsPastDateConverter.cs" />
     <Compile Include="Services\HasEventConverter.cs" />
     <Compile Include="Services\TimeSpanConverter.cs" />
@@ -204,9 +205,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\key-icon.png" />
   </ItemGroup>

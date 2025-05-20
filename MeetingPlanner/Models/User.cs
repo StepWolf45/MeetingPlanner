@@ -62,5 +62,7 @@ namespace MeetingPlanner.Models
         public virtual User Receiver { get; set; }
 
         public string FriendTag { get; set; }
+
+        public string TagColor { get; set; }
     }
 }
