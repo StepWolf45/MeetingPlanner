@@ -4,8 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:views="clr-namespace:MeetingPlanner.Views" 
+             xmlns:local="clr-namespace:MeetingPlanner.Views" xmlns:viewmodels="clr-namespace:MeetingPlanner.ViewModels" d:DataContext="{d:DesignInstance Type=viewmodels:InvitationsViewModel}"
              mc:Ignorable="d" 
-             Width="900" Height="600">
+             Width="900" Height="800">
 
     <UserControl.Resources>
         <SolidColorBrush x:Key="TabNormalBackground" Color="#0E294B"/>
@@ -172,6 +173,9 @@
             <!-- Вкладка контактов -->
             <TabItem Header="Контакты"  Style="{StaticResource CustomTabItemStyle}">
                 <views:ContactsView DataContext="{Binding ContactsViewModel}"/>
+            </TabItem>
+            <TabItem Header="Уведомления" Style="{StaticResource CustomTabItemStyle}">
+                <views:InvitationsView DataContext="{Binding InvitationsViewModel}"/>
             </TabItem>
         </TabControl>
     </Grid>

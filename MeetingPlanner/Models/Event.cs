@@ -32,5 +32,7 @@ namespace MeetingPlanner.Models
         public virtual User Organizer { get; set; }
 
         public virtual ICollection<User> Attendees { get; set; }
+
+        public virtual ICollection<EventInvitation> Invitations { get; set; }
     }
 }

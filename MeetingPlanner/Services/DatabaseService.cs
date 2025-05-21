@@ -12,8 +12,10 @@ namespace MeetingPlanner.Services
 
         public DbSet<User> Users { get; set; }
         public DbSet<FriendRequest> FriendRequests { get; set; }
+        public DbSet<FriendTag> FriendTags { get; set; }
         public DbSet<CalendarEvent> CalendarEvents { get; set; }
 
+        public DbSet<EventInvitation> EventInvitations { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

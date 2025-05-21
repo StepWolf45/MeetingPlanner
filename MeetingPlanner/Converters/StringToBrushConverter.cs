@@ -9,17 +9,18 @@ namespace MeetingPlanner.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-                return Brushes.Transparent;
-
-            try
+            if (value is string colorString && !string.IsNullOrEmpty(colorString))
             {
-                return new BrushConverter().ConvertFromString(value.ToString()) as Brush;
+                try
+                {
+                    return new SolidColorBrush((Color)ColorConverter.ConvertFromString(colorString));
+                }
+                catch
+                {
+                    return Brushes.Transparent;
+                }
             }
-            catch
-            {
-                return Brushes.Gray; // Цвет по умолчанию при ошибке
-            }
+            return Brushes.Transparent;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

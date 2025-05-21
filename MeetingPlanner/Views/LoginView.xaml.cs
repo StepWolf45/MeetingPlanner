@@ -10,7 +10,7 @@ namespace MeetingPlanner.Views
         public LoginView()
         {
             InitializeComponent();
-            DataContext = App.ServiceProvider.GetRequiredService<LoginViewModel>(); // Получение ViewModel из DI
+            DataContext = App.ServiceProvider.GetRequiredService<LoginViewModel>(); 
         }
 
         private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)

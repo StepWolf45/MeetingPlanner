@@ -6,7 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:MeetingPlanner.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="550" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="800">
 
     <UserControl.Resources>
         <DropShadowEffect x:Key="ShadowEffect" BlurRadius="10" ShadowDepth="3" Opacity="0.2"/>
@@ -32,7 +32,7 @@
 
     </UserControl.Resources>
 
-    <Grid>
+    <Grid  Background="#AFEEEE">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="300"/>
@@ -102,15 +102,15 @@
         <Border Grid.Column="1" Background="#3F888F" Padding="15">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="New Event" FontSize="16" FontWeight="Bold" Margin="0 0 0 10"/>
+                    <TextBlock Text="Создание мероприятия" Foreground="#fff" FontSize="18" FontWeight="Bold" Margin="0 0 0 10"/>
 
-                    <Label Content="Title*"/>
+                    <Label Content="Название *" Foreground="#fff"/>
                     <TextBox Text="{Binding NewEvent.Title, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <Label Content="Description"/>
+                    <Label Content="Описание" Foreground="#fff"/>
                     <TextBox Text="{Binding NewEvent.Description}" AcceptsReturn="True" MinHeight="60"/>
 
-                    <Label Content="Location"/>
+                    <Label Content="Локация" Foreground="#fff"/>
                     <TextBox Text="{Binding NewEvent.Location}"/>
 
                     <Grid>
@@ -120,9 +120,9 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Margin="0 0 5 0">
-                            <Label Content="Start Date"/>
+                            <Label Content="Дата начала" Foreground="#fff"/>
                             <DatePicker SelectedDate="{Binding StartDate, Mode=TwoWay}"/>
-                            <Label Content="Start Time"/>
+                            <Label Content="Время начала" Foreground="#fff"/>
                             <ComboBox SelectedItem="{Binding StartTime, Mode=TwoWay}"
                                       ItemsSource="{Binding TimeSlots}">
                                 <ComboBox.ItemTemplate>
@@ -134,9 +134,9 @@
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="5 0 0 0">
-                            <Label Content="End Date"/>
+                            <Label Content="Дата конца" Foreground="#fff"/>
                             <DatePicker SelectedDate="{Binding EndDate, Mode=TwoWay}"/>
-                            <Label Content="End Time"/>
+                            <Label Content="Время конца" Foreground="#fff"/>
                             <ComboBox SelectedItem="{Binding EndTime, Mode=TwoWay}"
                                       ItemsSource="{Binding TimeSlots}">
                                 <ComboBox.ItemTemplate>
@@ -148,9 +148,9 @@
                         </StackPanel>
                     </Grid>
 
-                    <Label Content="Invite Friends"/>
+                    <Label Content="Добавить участников" Foreground="#fff" Width="136"/>
                     <ComboBox ItemsSource="{Binding Friends}"
-                              SelectedItem="{Binding SelectedFriend}">
+                              SelectedItem="{Binding SelectedFriend}" Width="230">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
@@ -160,17 +160,16 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-
-                    <Button Content="Add" Command="{Binding AddAttendeeCommand}"
+                    <Button Content="Добавить" Command="{Binding AddAttendeeCommand}"
                            CommandParameter="{Binding SelectedFriend}"
-                           Style="{StaticResource PrimaryButton}"/>
+                           Style="{StaticResource PrimaryButton}" Width="232"/>
 
-                    <ListView ItemsSource="{Binding SelectedAttendees}" Height="100" Margin="0 10">
+                    <ListView ItemsSource="{Binding SelectedAttendees}" Height="100" Margin="0 10" Width="234">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding Username}" VerticalAlignment="Center"/>
-                                    <Button Content="Remove" Margin="10 0 0 0"
+                                    <Button Content="Удалить" Margin="10 0 0 0"
                                            Command="{Binding DataContext.RemoveAttendeeCommand,
                                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
                                            CommandParameter="{Binding}"
@@ -180,8 +179,8 @@
                         </ListView.ItemTemplate>
                     </ListView>
 
-                    <Button Content="Create Event" Command="{Binding CreateEventCommand}"
-                           Style="{StaticResource PrimaryButton}" Margin="0 10"/>
+                    <Button Content="Создать мероприятие" Command="{Binding CreateEventCommand}"
+                           Style="{StaticResource PrimaryButton}" Margin="0 10" Height="36"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -189,7 +188,7 @@
         <!-- Event Details Popup -->
         <Border Grid.ColumnSpan="2" Background="#80000000" Padding="20"
         Visibility="{Binding IsEventDetailsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border Background="White" Padding="0" CornerRadius="10" Width="400"
+            <Border Background="#AFEEEE" Padding="0" CornerRadius="10" Width="400"
             BorderThickness="1" BorderBrush="#E0E0E0"
             Effect="{StaticResource ShadowEffect}">
                 <Grid>
@@ -200,7 +199,7 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
-                    <Border Background="#6a7eee" CornerRadius="10,10,0,0" Padding="15">
+                    <Border Background="#0E294B" CornerRadius="10,10,0,0" Padding="15">
                         <TextBlock Text="{Binding SelectedDate, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"
                           Foreground="White" FontSize="16" FontWeight="Bold"/>
                     </Border>
@@ -231,7 +230,7 @@
                                             <!-- Location -->
                                             <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding Location, Converter={StaticResource StringToVisibilityConverter}}">
                                                 <Path Data="M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z"
-                                              Fill="#6a7eee" Width="20" Height="20" Margin="0,0,10,0"/>
+                                              Fill="#0E294B" Width="20" Height="20" Margin="0,0,10,0"/>
                                                 <TextBlock Text="{Binding Location}" 
                                                   FontSize="14" VerticalAlignment="Center"/>
                                             </StackPanel>
@@ -268,7 +267,7 @@
                     </ScrollViewer>
 
                     <!-- Footer -->
-                    <Border Grid.Row="2" Background="#F5F5F5" CornerRadius="0,0,10,10" Padding="10">
+                    <Border Grid.Row="2" Background="#3F888F" CornerRadius="0,0,10,10" Padding="10">
                         <Button Content="Close" Command="{Binding CloseEventDetailsCommand}"
                         Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
                         Width="100" Margin="0"/>

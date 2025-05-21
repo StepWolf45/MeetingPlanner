@@ -7,6 +7,7 @@ namespace MeetingPlanner.Models
 {
     public class User
     {
+
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
@@ -28,19 +29,19 @@ namespace MeetingPlanner.Models
 
         public bool HasPendingRequest { get; set; }
 
-        [NotMapped] 
-        public string FriendTag { get; set; }
-
         [NotMapped]
         public string FriendStatus { get; set; }
 
         [NotMapped]
         public Brush FriendStatusColor { get; set; }
+
         public virtual ICollection<FriendRequest> SentFriendRequests { get; set; }
         public virtual ICollection<FriendRequest> ReceivedFriendRequests { get; set; }
+        public virtual ICollection<FriendTag> FriendTags { get; set; }
         public virtual ICollection<User> Friends { get; set; }
-    }
 
+    }
+    
     public class FriendRequest
     {
         [Key]
@@ -60,9 +61,27 @@ namespace MeetingPlanner.Models
 
         [ForeignKey("ReceiverId")]
         public virtual User Receiver { get; set; }
+    }
 
-        public string FriendTag { get; set; }
+    public class FriendTag
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
 
+        [Required]
+        public int OwnerId { get; set; }
+
+        [Required]
+        public int FriendId { get; set; }
+
+        public string TagName { get; set; }
         public string TagColor { get; set; }
+
+        [ForeignKey("OwnerId")]
+        public virtual User Owner { get; set; }
+
+        [ForeignKey("FriendId")]
+        public virtual User Friend { get; set; }
     }
 }

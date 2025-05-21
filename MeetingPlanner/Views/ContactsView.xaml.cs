@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using MeetingPlanner.ViewModels;
 
 namespace MeetingPlanner.Views
@@ -14,11 +13,9 @@ namespace MeetingPlanner.Views
             {
                 vm.RequestFocus += (s, e) =>
                 {
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    Dispatcher.BeginInvoke(new System.Action(() =>
                     {
-                        // Используем правильное имя элемента
-                        var textBox = Template.FindName("TagInputTextBox", this) as TextBox;
-                        textBox?.Focus();
+                        TagInputTextBox?.Focus();
                     }), System.Windows.Threading.DispatcherPriority.Render);
                 };
             }

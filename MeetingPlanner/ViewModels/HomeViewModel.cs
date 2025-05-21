@@ -50,11 +50,20 @@ namespace MeetingPlanner.ViewModels
         }
         public ContactsViewModel ContactsViewModel { get; }
 
-        public HomeViewModel(DatabaseService db, ContactsViewModel contactsViewModel, CalendarViewModel calendarViewModel)
+
+        private InvitationsViewModel _invitationsViewModel;
+
+        public InvitationsViewModel InvitationsViewModel
+        {
+            get => _invitationsViewModel;
+            set => SetProperty(ref _invitationsViewModel, value);
+        }
+        public HomeViewModel(DatabaseService db, ContactsViewModel contactsViewModel, CalendarViewModel calendarViewModel, InvitationsViewModel invitationsViewModel)
         {
             _db = db;
             ContactsViewModel = contactsViewModel;
             CalendarViewModel = calendarViewModel;
+            InvitationsViewModel = new InvitationsViewModel(db);
             SaveChangesCommand = new RelayCommand(SaveChanges);
             LogoutCommand = new RelayCommand(Logout);
         }
@@ -67,6 +76,7 @@ namespace MeetingPlanner.ViewModels
             AvatarPath = _currentUser.AvatarPath;
             ContactsViewModel.SetCurrentUser(currentUser);
             CalendarViewModel.SetCurrentUser(currentUser);
+            InvitationsViewModel.SetCurrentUser(currentUser);
         }
 
         public IRelayCommand SaveChangesCommand { get; }
