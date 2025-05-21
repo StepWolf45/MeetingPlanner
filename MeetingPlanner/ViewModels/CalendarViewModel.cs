@@ -18,7 +18,6 @@ namespace MeetingPlanner.ViewModels
         private User _currentUser;
         private DateTime _selectedDate;
         private bool _isEventDetailsVisible;
-        private CalendarEvent _selectedEvent;
         private User _selectedFriend;
 
         public ObservableCollection<CalendarEvent> SelectedEvents { get; } = new ObservableCollection<CalendarEvent>();
@@ -40,7 +39,7 @@ namespace MeetingPlanner.ViewModels
             get => _isEventDetailsVisible;
             set => SetProperty(ref _isEventDetailsVisible, value);
         }
-
+        private CalendarEvent _selectedEvent;
         public CalendarEvent SelectedEvent
         {
             get => _selectedEvent;
@@ -95,22 +94,23 @@ namespace MeetingPlanner.ViewModels
         private void LoadEventsForSelectedDate()
         {
             var eventsOnDate = GetEventsForDate(SelectedDate).ToList();
+            SelectedEvents.Clear();
+
             if (eventsOnDate.Any())
             {
-                SelectedEvents.Clear();
                 foreach (var ev in eventsOnDate)
                 {
                     SelectedEvents.Add(ev);
                 }
+                SelectedEvent = SelectedEvents.First(); // Автоматически выбираем первое событие
                 IsEventDetailsVisible = true;
             }
             else
             {
-                SelectedEvents.Clear();
+                SelectedEvent = null;
                 IsEventDetailsVisible = false;
             }
 
-            // Сбрасываем форму для нового события
             NewEvent.StartTime = SelectedDate;
             NewEvent.EndTime = SelectedDate.AddHours(1);
         }
@@ -213,5 +213,65 @@ namespace MeetingPlanner.ViewModels
         public ICommand CloseEventDetailsCommand { get; }
         public ICommand AddAttendeeCommand { get; }
         public ICommand RemoveAttendeeCommand { get; }
+        // CalendarViewModel.cs
+        public string CurrentInvitationStatus
+        {
+            get
+            {
+                if (SelectedEvent == null || _currentUser == null)
+                    return string.Empty;
+
+                var invitation = _db.EventInvitations
+                    .FirstOrDefault(i => i.EventId == SelectedEvent.Id && i.UserId == _currentUser.Id);
+
+                if (invitation == null) return "Не отвечено";
+
+                switch (invitation.Status)
+                {
+                    case ResponseStatus.Accepted: return "Вы придете";
+                    case ResponseStatus.Declined: return "Вы не придете";
+                    case ResponseStatus.Maybe: return "Вы возможно придете";
+                    case ResponseStatus.Custom: return "Ваш ответ: " + (invitation.CustomResponse ?? "Свой вариант");
+                    default: return "Вы не ответили";
+                }
+            }
+        }
+        public string GetInvitationStatus(CalendarEvent calendarEvent, int userId)
+        {
+            if (calendarEvent == null) return "Не отвечено";
+
+            if (calendarEvent.Organizer?.Id == _currentUser.Id)
+            {
+                var invitation = _db.EventInvitations
+                    .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == userId);
+
+                if (invitation == null) return "Не отвечено";
+
+                switch (invitation.Status)
+                {
+                    case ResponseStatus.Accepted: return "Придет";
+                    case ResponseStatus.Declined: return "Не придет";
+                    case ResponseStatus.Maybe: return "Возможно";
+                    case ResponseStatus.Custom: return invitation.CustomResponse ?? "Свой вариант";
+                    default: return "Не отвечено";
+                }
+            }
+            else
+            {
+                var invitation = _db.EventInvitations
+                    .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == _currentUser.Id);
+
+                if (invitation == null) return "Вы не ответили";
+
+                switch (invitation.Status)
+                {
+                    case ResponseStatus.Accepted: return "Вы придете";
+                    case ResponseStatus.Declined: return "Вы не придете";
+                    case ResponseStatus.Maybe: return "Вы возможно придете";
+                    case ResponseStatus.Custom: return "Ваш ответ: " + (invitation.CustomResponse ?? "Свой вариант");
+                    default: return "Вы не ответили";
+                }
+            }
+        }
     }
 }

@@ -113,6 +113,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Services\InitialsConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToBrushConverter.cs" />
     <Compile Include="Converters\FriendStatusToVisibilityConverter.cs" />

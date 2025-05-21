@@ -1,4 +1,5 @@
-﻿
+﻿// EventInvitation.cs
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,6 +19,7 @@ namespace MeetingPlanner.Models
 
         public ResponseStatus Status { get; set; } = ResponseStatus.Pending;
         public string CustomResponse { get; set; }
+        public DateTime ResponseDate { get; set; } = DateTime.Now;
 
         [ForeignKey("EventId")]
         public virtual CalendarEvent Event { get; set; }

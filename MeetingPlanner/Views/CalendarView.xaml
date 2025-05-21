@@ -6,7 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:MeetingPlanner.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="800">
+             d:DesignHeight="700" d:DesignWidth="900">
 
     <UserControl.Resources>
         <DropShadowEffect x:Key="ShadowEffect" BlurRadius="10" ShadowDepth="3" Opacity="0.2"/>
@@ -15,6 +15,7 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:HasEventConverter x:Key="HasEventConverter"/>
         <converters:TimeSpanConverter x:Key="TimeSpanConverter"/>
+        <converters:InitialsConverter x:Key="InitialsConverter"/>
         <Style TargetType="Button" x:Key="PrimaryButton">
             <Setter Property="Background" Value="#003153"/>
             <Setter Property="Foreground" Value="White"/>
@@ -154,8 +155,8 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding Firstname}"/>
-                                    <TextBlock Text="{Binding Username}"/>
+                                    <TextBlock Text="{Binding Firstname}" Foreground="#000"/>
+                                    <TextBlock Text="{Binding Username}" Foreground="#000"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -188,7 +189,7 @@
         <!-- Event Details Popup -->
         <Border Grid.ColumnSpan="2" Background="#80000000" Padding="20"
         Visibility="{Binding IsEventDetailsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Border Background="#AFEEEE" Padding="0" CornerRadius="10" Width="400"
+            <Border Background="#AFEEEE" Padding="0" CornerRadius="10" Width="400" MaxHeight="500"
             BorderThickness="1" BorderBrush="#E0E0E0"
             Effect="{StaticResource ShadowEffect}">
                 <Grid>
@@ -200,75 +201,88 @@
 
                     <!-- Header -->
                     <Border Background="#0E294B" CornerRadius="10,10,0,0" Padding="15">
-                        <TextBlock Text="{Binding SelectedDate, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"
-                          Foreground="White" FontSize="16" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding SelectedEvent.Title}" 
+                          Foreground="White" 
+                          FontSize="16" 
+                          FontWeight="Bold"
+                          TextWrapping="Wrap"/>
                     </Border>
 
                     <!-- Content -->
                     <ScrollViewer Grid.Row="1" Padding="15" VerticalScrollBarVisibility="Auto">
-                        <ItemsControl ItemsSource="{Binding SelectedEvents}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Margin="0,0,0,15" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1" Padding="0,0,0,15">
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Title}" 
-                                              FontSize="16" FontWeight="Bold"/>
+                        <StackPanel>
+                            <!-- Description -->
+                            <TextBlock Text="{Binding SelectedEvent.Description}" 
+                              TextWrapping="Wrap" 
+                              FontSize="14"
+                              Margin="0,0,0,0" FontWeight="Light" Foreground="#003153"/>
 
-                                            <!-- Time -->
-                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                                                <Border Background="#F5F5F5" CornerRadius="5" Padding="8">
-                                                    <TextBlock Text="{Binding StartTime, StringFormat='{}{0:HH:mm}'}" 
-                                                        FontWeight="SemiBold"/>
-                                                </Border>
-                                                <TextBlock Text=" - " VerticalAlignment="Center" Margin="5,0"/>
-                                                <Border Background="#F5F5F5" CornerRadius="5" Padding="8">
-                                                    <TextBlock Text="{Binding EndTime, StringFormat='{}{0:HH:mm}'}" 
-                                                        FontWeight="SemiBold"/>
-                                                </Border>
+                            <!-- Location -->
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Path Data="M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z"
+                              Fill="DarkRed" Width="17" Height="19" Margin="0,0,5,0" Stretch="Fill"/>
+                                <TextBlock Text="{Binding SelectedEvent.Location}" 
+                                  FontSize="14"  Foreground="#003153"/>
+                            </StackPanel>
+
+                            <!-- Time -->
+                            <StackPanel Margin="0,0,0,15">
+                                <TextBlock Text="Время мероприятия:" FontWeight="Bold" Margin="0,0,0,5"  Foreground="#003153"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="Начало:" Grid.Row="0" Grid.Column="0" Margin="0,0,5,5"  FontWeight="Light" Foreground="#003153"/>
+                                    <TextBlock Text="{Binding SelectedEvent.StartTime, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" 
+                                      Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"  Foreground="#003153" FontWeight="Light"/>
+
+                                    <TextBlock Text="Окончание:" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" FontWeight="Light" Foreground="#003153"/>
+                                    <TextBlock Text="{Binding SelectedEvent.EndTime, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}" 
+                                      Grid.Row="1" Grid.Column="1"  FontWeight="Light" Foreground="#003153"/>
+                                </Grid>
+                            </StackPanel>
+
+                            <!-- Attendees -->
+                            <TextBlock Text="Участники:" FontWeight="Bold" Margin="0,0,0,5"  Foreground="#003153"/>
+                            <!-- В разделе Attendees добавьте отображение статуса -->
+                            <ItemsControl ItemsSource="{Binding SelectedEvent.Attendees}" Margin="5,0,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#F5F5F5" CornerRadius="15" Padding="5" Margin="0,0,5,5">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="{Binding AvatarPath}" 
+                           Width="40" Height="40" 
+                           Margin="0,0,10,0">
+                                                    <Image.Clip>
+                                                        <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
+                                                    </Image.Clip>
+                                                </Image>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding FirstName}" FontWeight="Bold" Foreground="#003153"/>
+                                                    <TextBlock Text="{Binding LastName}" FontWeight="Bold" Foreground="#003153"/>
+                                                    <TextBlock Text="{Binding Username}" FontSize="12" FontWeight="SemiBold" Foreground="#003153"/>
+                                                    <TextBlock FontSize="12" Foreground="#003153">
+                            <Run Text="Статус: " Foreground="#003153"/>
+                           <TextBlock Text="{Binding CurrentInvitationStatus}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
                                             </StackPanel>
-
-                                            <!-- Location -->
-                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,5" Visibility="{Binding Location, Converter={StaticResource StringToVisibilityConverter}}">
-                                                <Path Data="M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z"
-                                              Fill="#0E294B" Width="20" Height="20" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding Location}" 
-                                                  FontSize="14" VerticalAlignment="Center"/>
-                                            </StackPanel>
-
-                                            <!-- Description -->
-                                            <TextBlock Text="{Binding Description}" 
-                                              TextWrapping="Wrap" FontSize="14" Margin="0,5,0,0"
-                                              Visibility="{Binding Description, Converter={StaticResource StringToVisibilityConverter}}"/>
-
-                                            <!-- Attendees -->
-                                            <TextBlock Text="Attendees:" FontWeight="Bold" Margin="0,5,0,0"
-                                               Visibility="{Binding Attendees.Count, Converter={StaticResource IntToVisibilityConverter}}"/>
-                                            <ItemsControl ItemsSource="{Binding Attendees}" Margin="5,0,0,0">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Border Background="#F5F5F5" CornerRadius="15" Padding="5,3" Margin="0,0,5,5">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Ellipse Width="24" Height="24" Fill="#6a7eee" Margin="0,0,5,0">
-                                                                    <Ellipse.OpacityMask>
-                                                                        <VisualBrush Visual="{Binding Icon}"/>
-                                                                    </Ellipse.OpacityMask>
-                                                                </Ellipse>
-                                                                <TextBlock Text="{Binding Username}" VerticalAlignment="Center"/>
-                                                            </StackPanel>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </ScrollViewer>
 
                     <!-- Footer -->
                     <Border Grid.Row="2" Background="#3F888F" CornerRadius="0,0,10,10" Padding="10">
-                        <Button Content="Close" Command="{Binding CloseEventDetailsCommand}"
+                        <Button Content="Закрыть" Command="{Binding CloseEventDetailsCommand}"
                         Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
                         Width="100" Margin="0"/>
                     </Border>

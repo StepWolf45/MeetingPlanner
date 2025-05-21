@@ -147,7 +147,7 @@
                                 </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0.2,0" Width="539" Height="44">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0.2,0" Width="830" Height="44">
 
                                 <Button Content="Сохранить изменения" 
                                         Command="{Binding SaveChangesCommand}" 
