@@ -10,8 +10,12 @@
 
     <!-- Ресурсы для анимаций кнопок внизу -->
     <UserControl.Resources>
+        <SolidColorBrush x:Key="ButtonBaseColor" Color=" #0E294B"/>
+        <SolidColorBrush x:Key="ButtonHoverColor" Color="#0E294B"/>
+        <SolidColorBrush x:Key="SecondaryButtonColor" Color="#555"/>
+
         <Style TargetType="Button" x:Key="AuthButtonStyle">
-            <Setter Property="Background" Value=" #0E294B"/>
+            <Setter Property="Background" Value="{StaticResource ButtonBaseColor}"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -33,12 +37,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ButtonHoverColor}"/>
                                 <Trigger.EnterActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <ColorAnimation Storyboard.TargetName="border" 
-                                                           Storyboard.TargetProperty="Background.Color"
-                                                           To=" #0E294B" Duration="0:0:0.2"/>
                                             <DoubleAnimation Storyboard.TargetName="border" 
                                                             Storyboard.TargetProperty="RenderTransform.ScaleX"
                                                             To="1.03" Duration="0:0:0.1"/>
@@ -51,9 +53,6 @@
                                 <Trigger.ExitActions>
                                     <BeginStoryboard>
                                         <Storyboard>
-                                            <ColorAnimation Storyboard.TargetName="border" 
-                                                           Storyboard.TargetProperty="Background.Color"
-                                                           To="#6a7eee" Duration="0:0:0.3"/>
                                             <DoubleAnimation Storyboard.TargetName="border" 
                                                             Storyboard.TargetProperty="RenderTransform.ScaleX"
                                                             To="1" Duration="0:0:0.2"/>
@@ -162,7 +161,7 @@
                     <Button Content="Регистрация" 
                     Click="GoToRegister_Click" 
                     Style="{StaticResource AuthButtonStyle}"
-                    Background="#555"
+                    Background="{StaticResource SecondaryButtonColor}"
                     Width="140"/>
                 </StackPanel>
 

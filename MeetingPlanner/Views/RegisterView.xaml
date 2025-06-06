@@ -185,7 +185,7 @@
                             Orientation="Horizontal"
                             Width="355"
                             Height="45" Margin="25,356,0,179">
-                    <Button Content="Зарегистрировать" 
+                    <Button Content="Зарегистрироваться" 
                             Command="{Binding RegisterCommand}" 
                             Style="{StaticResource AuthButtonStyle}"
                             Width="170"/>
