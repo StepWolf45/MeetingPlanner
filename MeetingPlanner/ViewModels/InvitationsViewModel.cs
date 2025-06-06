@@ -38,7 +38,9 @@ namespace MeetingPlanner.ViewModels
             var invitations = _db.EventInvitations
                 .Include("Event")
                 .Include("Event.Organizer")
-                .Where(i => i.UserId == _currentUser.Id && i.Status == ResponseStatus.Pending)
+                .Where(i => i.UserId == _currentUser.Id &&
+                       (i.Status == ResponseStatus.Pending || i.Status == ResponseStatus.Maybe))
+                .OrderByDescending(i => i.Event.StartTime)
                 .ToList();
 
             foreach (var inv in invitations)
@@ -52,9 +54,9 @@ namespace MeetingPlanner.ViewModels
             if (invitation == null) return;
 
             var button = FindButtonByCommand();
-            if (button != null)
+            if (button != null && button.Tag is string tag)
             {
-                switch (button.Tag as string)
+                switch (tag)
                 {
                     case "Accepted":
                         invitation.Status = ResponseStatus.Accepted;
@@ -65,18 +67,39 @@ namespace MeetingPlanner.ViewModels
                     case "Maybe":
                         invitation.Status = ResponseStatus.Maybe;
                         break;
+                }
+
+                invitation.ResponseDate = DateTime.Now;
+                _db.SaveChanges();
+
+                string responseMessage;
+                switch (tag)
+                {
+                    case "Accepted":
+                        responseMessage = "Вы подтвердили участие";
+                        break;
+                    case "Declined":
+                        responseMessage = "Вы отказались от участия";
+                        break;
+                    case "Maybe":
+                        responseMessage = "Вы ответили 'Возможно'";
+                        break;
                     default:
-                        invitation.Status = ResponseStatus.Pending;
+                        responseMessage = "Ответ сохранен";
                         break;
                 }
 
-                _db.SaveChanges();
+                MessageBox.Show(responseMessage, "Спасибо за ответ!", MessageBoxButton.OK, MessageBoxImage.Information);
+
                 LoadInvitations();
 
-                MessageBox.Show("Response saved!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                var mainWindow = Application.Current.MainWindow;
+                if (mainWindow?.DataContext is HomeViewModel homeViewModel)
+                {
+                    homeViewModel.CalendarViewModel.LoadEvents();
+                }
             }
         }
-
         private Button FindButtonByCommand()
         {
             foreach (Window window in Application.Current.Windows)

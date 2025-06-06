@@ -96,14 +96,30 @@ namespace MeetingPlanner.ViewModels
             var eventsOnDate = GetEventsForDate(SelectedDate).ToList();
             SelectedEvents.Clear();
 
-            if (eventsOnDate.Any())
+            foreach (var ev in eventsOnDate)
             {
-                foreach (var ev in eventsOnDate)
+                // Загружаем связанные данные для каждого события
+                var fullEvent = _db.CalendarEvents
+                    .Include(e => e.Organizer)
+                    .Include(e => e.Attendees)
+                    .Include(e => e.Invitations)
+                    .FirstOrDefault(e => e.Id == ev.Id);
+
+                SelectedEvents.Add(fullEvent ?? ev);
+            }
+
+            if (SelectedEvents.Any())
+            {
+                SelectedEvent = SelectedEvents.First();
+                if (SelectedEvent != null && SelectedEvent.Attendees != null)
                 {
-                    SelectedEvents.Add(ev);
+                    foreach (var attendee in SelectedEvent.Attendees)
+                    {
+                        attendee.CurrentEventStatus = GetInvitationStatus(SelectedEvent, attendee.Id);
+                    }
                 }
-                SelectedEvent = SelectedEvents.First(); // Автоматически выбираем первое событие
                 IsEventDetailsVisible = true;
+                OnPropertyChanged(nameof(CurrentInvitationStatus)); // Обновляем статус текущего пользователя
             }
             else
             {
@@ -135,16 +151,28 @@ namespace MeetingPlanner.ViewModels
                 NewEvent.Attendees = SelectedAttendees.ToList();
 
                 _db.CalendarEvents.Add(NewEvent);
-                _db.SaveChanges();
 
+                // Создаем приглашения для всех участников
+                foreach (var attendee in SelectedAttendees)
+                {
+                    var invitation = new EventInvitation
+                    {
+                        Event = NewEvent,
+                        User = attendee,
+                        Status = ResponseStatus.Pending
+                    };
+                    _db.EventInvitations.Add(invitation);
+                }
+
+                _db.SaveChanges();
                 Events.Add(NewEvent);
                 ResetEventForm();
 
-                MessageBox.Show("Event created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Событие создано успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error creating event: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Ошибка при создании события: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -164,7 +192,7 @@ namespace MeetingPlanner.ViewModels
                         .OrderBy(e => e.StartTime);
         }
 
-        private void LoadEvents()
+         public void LoadEvents()
         {
             Events.Clear();
             var events = _db.CalendarEvents
@@ -238,38 +266,64 @@ namespace MeetingPlanner.ViewModels
         }
         public string GetInvitationStatus(CalendarEvent calendarEvent, int userId)
         {
-            if (calendarEvent == null) return "Не отвечено";
-
-            if (calendarEvent.Organizer?.Id == _currentUser.Id)
+            if (calendarEvent == null)
             {
-                var invitation = _db.EventInvitations
-                    .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == userId);
+                return "Не отвечено";
+            }
 
-                if (invitation == null) return "Не отвечено";
+            // Получаем приглашение из базы данных
+            var invitation = _db.EventInvitations
+                .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == userId);
+
+            // Проверяем, является ли текущий пользователь организатором события
+            bool isOrganizer = calendarEvent.Organizer?.Id == _currentUser.Id;
+
+            if (isOrganizer)
+            {
+                // Логика для организатора
+                if (invitation == null)
+                {
+                    return "Не отвечено";
+                }
 
                 switch (invitation.Status)
                 {
-                    case ResponseStatus.Accepted: return "Придет";
-                    case ResponseStatus.Declined: return "Не придет";
-                    case ResponseStatus.Maybe: return "Возможно";
-                    case ResponseStatus.Custom: return invitation.CustomResponse ?? "Свой вариант";
-                    default: return "Не отвечено";
+                    case ResponseStatus.Accepted:
+                        return "Придет";
+                    case ResponseStatus.Declined:
+                        return "Не придет";
+                    case ResponseStatus.Maybe:
+                        return "Возможно";
+                    case ResponseStatus.Custom:
+                        return !string.IsNullOrEmpty(invitation.CustomResponse)
+                            ? invitation.CustomResponse
+                            : "Свой вариант";
+                    default:
+                        return "Не отвечено";
                 }
             }
             else
             {
-                var invitation = _db.EventInvitations
-                    .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == _currentUser.Id);
-
-                if (invitation == null) return "Вы не ответили";
+                // Логика для участника
+                if (invitation == null)
+                {
+                    return "Вы не ответили";
+                }
 
                 switch (invitation.Status)
                 {
-                    case ResponseStatus.Accepted: return "Вы придете";
-                    case ResponseStatus.Declined: return "Вы не придете";
-                    case ResponseStatus.Maybe: return "Вы возможно придете";
-                    case ResponseStatus.Custom: return "Ваш ответ: " + (invitation.CustomResponse ?? "Свой вариант");
-                    default: return "Вы не ответили";
+                    case ResponseStatus.Accepted:
+                        return "Вы придете";
+                    case ResponseStatus.Declined:
+                        return "Вы не придете";
+                    case ResponseStatus.Maybe:
+                        return "Вы возможно придете";
+                    case ResponseStatus.Custom:
+                        return "Ваш ответ: " + (!string.IsNullOrEmpty(invitation.CustomResponse)
+                            ? invitation.CustomResponse
+                            : "Свой вариант");
+                    default:
+                        return "Вы не ответили";
                 }
             }
         }

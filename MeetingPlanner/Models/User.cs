@@ -34,7 +34,8 @@ namespace MeetingPlanner.Models
 
         [NotMapped]
         public Brush FriendStatusColor { get; set; }
-
+        [NotMapped] 
+        public string CurrentEventStatus { get; set; }
         public virtual ICollection<FriendRequest> SentFriendRequests { get; set; }
         public virtual ICollection<FriendRequest> ReceivedFriendRequests { get; set; }
         public virtual ICollection<FriendTag> FriendTags { get; set; }

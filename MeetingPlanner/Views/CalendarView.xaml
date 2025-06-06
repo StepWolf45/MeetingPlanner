@@ -268,8 +268,8 @@
                                                     <TextBlock Text="{Binding LastName}" FontWeight="Bold" Foreground="#003153"/>
                                                     <TextBlock Text="{Binding Username}" FontSize="12" FontWeight="SemiBold" Foreground="#003153"/>
                                                     <TextBlock FontSize="12" Foreground="#003153">
-                            <Run Text="Статус: " Foreground="#003153"/>
-                           <TextBlock Text="{Binding CurrentInvitationStatus}"/>
+                                                        <Run Text="Статус: " Foreground="#003153"/>
+                                                        <TextBlock Text="{Binding CurrentEventStatus}"/>
                                                     </TextBlock>
                                                 </StackPanel>
                                             </StackPanel>
