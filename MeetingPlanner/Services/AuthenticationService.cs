@@ -14,15 +14,15 @@ namespace MeetingPlanner.Services
 
         public bool RegisterUser(string username, string password)
         {
-            if (_db.Users.Any(u => u.Username == username))
+            // Быстрая проверка существования пользователя перед тяжелыми операциями
+            if (_db.Users.AsNoTracking().Any(u => u.Username == username))
             {
-                return false; // Пользователь с таким именем уже существует
+                return false;
             }
 
-            // Хешируем пароль с использованием BCrypt
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-
             var newUser = new User { Username = username, Password = hashedPassword };
+
             _db.Users.Add(newUser);
             _db.SaveChanges();
             return true;
@@ -30,24 +30,24 @@ namespace MeetingPlanner.Services
 
         public User AuthenticateUser(string username, string password)
         {
-            var user = _db.Users.FirstOrDefault(u => u.Username == username);
+            // Используем AsNoTracking для ускорения, т.к. нам не нужно отслеживать изменения
+            var user = _db.Users.AsNoTracking().FirstOrDefault(u => u.Username == username);
 
             if (user == null)
             {
-                return null; // Пользователь не найден
+                // Возвращаем null сразу, без вычисления хеша
+                return null;
             }
 
-            // Верифицируем введенный пароль с хешем из БД
+            // Добавляем быструю проверку длины хеша перед сложной проверкой
+            if (user.Password?.Length != 60) // BCrypt hash всегда 60 символов
+            {
+                return null;
+            }
+
             bool passwordMatches = BCrypt.Net.BCrypt.Verify(password, user.Password);
 
-            if (passwordMatches)
-            {
-                return user;
-            }
-            else
-            {
-                return null; // Неверный пароль
-            }
+            return passwordMatches ? user : null;
         }
     }
 }

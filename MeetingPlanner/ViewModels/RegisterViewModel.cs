@@ -1,39 +1,66 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Services;
-using System.Windows;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace MeetingPlanner.ViewModels
 {
     public class RegisterViewModel : ObservableObject
     {
         private string _username;
+        private string _password;
+        private string _confirmPassword;
+        private string _errorMessage;
+        private CancellationTokenSource _errorMessageCts;
+
         public string Username
         {
             get => _username;
             set => SetProperty(ref _username, value);
         }
 
-        private string _password;
         public string Password
         {
             get => _password;
             set => SetProperty(ref _password, value);
         }
 
-        private string _confirmPassword;
         public string ConfirmPassword
         {
             get => _confirmPassword;
             set => SetProperty(ref _confirmPassword, value);
         }
 
-        private string _errorMessage;
         public string ErrorMessage
         {
             get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
+            set
+            {
+                // Отменяем предыдущий таймер
+                _errorMessageCts?.Cancel();
+
+                // Устанавливаем новое сообщение
+                SetProperty(ref _errorMessage, value);
+
+                // Если сообщение не пустое - запускаем таймер
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _errorMessageCts = new CancellationTokenSource();
+                    var token = _errorMessageCts.Token;
+
+                    Task.Delay(3500, token).ContinueWith(t =>
+                    {
+                        // Если таймер не был отменен - очищаем сообщение
+                        if (!t.IsCanceled && !token.IsCancellationRequested)
+                        {
+                            ErrorMessage = string.Empty;
+                        }
+                    }, TaskScheduler.FromCurrentSynchronizationContext());
+                }
+            }
         }
 
         private readonly AuthenticationService _authenticationService;

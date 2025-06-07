@@ -33,7 +33,45 @@ namespace MeetingPlanner.ViewModels
             get => _selectedDate;
             set => SetProperty(ref _selectedDate, value);
         }
+        public DateTime StartDate
+        {
+            get => NewEvent.StartTime.Date;
+            set
+            {
+                NewEvent.StartTime = value.Date + NewEvent.StartTime.TimeOfDay;
+                OnPropertyChanged();
+            }
+        }
 
+        public DateTime EndDate
+        {
+            get => NewEvent.EndTime.Date;
+            set
+            {
+                NewEvent.EndTime = value.Date + NewEvent.EndTime.TimeOfDay;
+                OnPropertyChanged();
+            }
+        }
+
+        public TimeSpan StartTime
+        {
+            get => NewEvent.StartTime.TimeOfDay;
+            set
+            {
+                NewEvent.StartTime = NewEvent.StartTime.Date + value;
+                OnPropertyChanged();
+            }
+        }
+
+        public TimeSpan EndTime
+        {
+            get => NewEvent.EndTime.TimeOfDay;
+            set
+            {
+                NewEvent.EndTime = NewEvent.EndTime.Date + value;
+                OnPropertyChanged();
+            }
+        }
         public bool IsEventDetailsVisible
         {
             get => _isEventDetailsVisible;
@@ -89,6 +127,8 @@ namespace MeetingPlanner.ViewModels
             if (!date.HasValue) return;
 
             SelectedDate = date.Value;
+            StartDate = date.Value;
+            EndDate = date.Value;
             LoadEventsForSelectedDate();
         }
         private void LoadEventsForSelectedDate()

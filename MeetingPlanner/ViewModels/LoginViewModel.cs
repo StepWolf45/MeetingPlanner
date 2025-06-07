@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Models;
 using MeetingPlanner.Services;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -10,32 +11,46 @@ namespace MeetingPlanner.ViewModels
     public class LoginViewModel : ObservableObject
     {
         private string _username;
+        private string _password;
+        private string _errorMessage;
+        private CancellationTokenSource _errorMessageCts;
+
         public string Username
         {
             get => _username;
             set => SetProperty(ref _username, value);
         }
 
-        private string _password;
         public string Password
         {
             get => _password;
             set => SetProperty(ref _password, value);
         }
-        private string _errorMessage;
+
         public string ErrorMessage
         {
             get => _errorMessage;
             set
             {
+                // Отменяем предыдущий таймер
+                _errorMessageCts?.Cancel();
+
+                // Устанавливаем новое сообщение
                 SetProperty(ref _errorMessage, value);
 
-                // Автоматическое скрытие через 3 секунды
+                // Если сообщение не пустое - запускаем таймер
                 if (!string.IsNullOrEmpty(value))
                 {
-                    Task.Delay(3500).ContinueWith(_ =>
+                    _errorMessageCts = new CancellationTokenSource();
+                    var token = _errorMessageCts.Token;
+
+                    Task.Delay(3500, token).ContinueWith(t =>
                     {
-                        ErrorMessage = string.Empty;
+                        // Если таймер не был отменен - очищаем сообщение
+                        if (!t.IsCanceled && !token.IsCancellationRequested)
+                        {
+                            ErrorMessage = string.Empty;
+                        }
                     }, TaskScheduler.FromCurrentSynchronizationContext());
                 }
             }
@@ -63,7 +78,6 @@ namespace MeetingPlanner.ViewModels
 
             if (user != null)
             {
-
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 mainWindow?.ShowHomeView(user);
             }
