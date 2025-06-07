@@ -111,7 +111,7 @@
                     <Label Content="Описание" Foreground="#fff"/>
                     <TextBox Text="{Binding NewEvent.Description}" AcceptsReturn="True" MinHeight="60"/>
 
-                    <Label Content="Локация" Foreground="#fff"/>
+                    <Label Content="Локация *" Foreground="#fff"/>
                     <TextBox Text="{Binding NewEvent.Location}"/>
 
                     <Grid>
@@ -121,30 +121,46 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Margin="0 0 5 0">
-                            <Label Content="Дата начала" Foreground="#fff"/>
+                            <Label Content="Дата начала *" Foreground="#fff"/>
                             <DatePicker SelectedDate="{Binding StartDate, Mode=TwoWay}"/>
-                            <Label Content="Время начала" Foreground="#fff"/>
-                            <ComboBox SelectedItem="{Binding StartTime, Mode=TwoWay}"
-                                      ItemsSource="{Binding TimeSlots}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource TimeSpanConverter}}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
+                            <Label Content="Время начала *" Foreground="#fff"/>
+                            <ComboBox SelectedItem="{Binding StartTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+          ItemsSource="{Binding TimeSlots}">
+                                <ComboBox.Style>
+                                    <Style TargetType="ComboBox">
+                                        <Setter Property="BorderBrush" Value="LightGray"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding StartTime.TimeOfDay}" Value="00:00:00">
+                                                <Setter Property="BorderBrush" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding StartTime.TimeOfDay}" Value="{x:Null}">
+                                                <Setter Property="BorderBrush" Value="Red"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ComboBox.Style>
                             </ComboBox>
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Margin="5 0 0 0">
-                            <Label Content="Дата конца" Foreground="#fff"/>
+                            <Label Content="Дата конца *" Foreground="#fff"/>
                             <DatePicker SelectedDate="{Binding EndDate, Mode=TwoWay}"/>
-                            <Label Content="Время конца" Foreground="#fff"/>
-                            <ComboBox SelectedItem="{Binding EndTime, Mode=TwoWay}"
-                                      ItemsSource="{Binding TimeSlots}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Converter={StaticResource TimeSpanConverter}}"/>
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
+                            <Label Content="Время конца *" Foreground="#fff"/>
+                            <ComboBox SelectedItem="{Binding EndTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+          ItemsSource="{Binding TimeSlots}">
+                                <ComboBox.Style>
+                                    <Style TargetType="ComboBox">
+                                        <Setter Property="BorderBrush" Value="LightGray"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding EndTime.TimeOfDay}" Value="00:00:00">
+                                                <Setter Property="BorderBrush" Value="Red"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding EndTime.TimeOfDay}" Value="{x:Null}">
+                                                <Setter Property="BorderBrush" Value="Red"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ComboBox.Style>
                             </ComboBox>
                         </StackPanel>
                     </Grid>
@@ -200,12 +216,27 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header -->
+                    <!-- Header -->
                     <Border Background="#0E294B" CornerRadius="10,10,0,0" Padding="15">
-                        <TextBlock Text="{Binding SelectedEvent.Title}" 
-                          Foreground="White" 
-                          FontSize="16" 
-                          FontWeight="Bold"
-                          TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button Content="&lt;" Command="{Binding PreviousEventCommand}" 
+                        Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SelectedEvent.Title}" 
+                               Foreground="White" 
+                               FontSize="16" 
+                               FontWeight="Bold"
+                               TextWrapping="Wrap"
+                               HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding EventCounterText}" 
+                               Foreground="White" 
+                               FontSize="12" 
+                               HorizontalAlignment="Center"
+                               Margin="0,5,0,0"/>
+                                    </StackPanel>
+                            <Button Content="&gt;" Command="{Binding NextEventCommand}" 
+                        Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/>
+                        </StackPanel>
                     </Border>
 
                     <!-- Content -->
@@ -281,7 +312,7 @@
                     </ScrollViewer>
 
                     <!-- Footer -->
-                    <Border Grid.Row="2" Background="#3F888F" CornerRadius="0,0,10,10" Padding="10">
+                    <Border Grid.Row="3" Background="#3F888F" CornerRadius="0,0,10,10" Padding="10">
                         <Button Content="Закрыть" Command="{Binding CloseEventDetailsCommand}"
                         Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
                         Width="100" Margin="0"/>

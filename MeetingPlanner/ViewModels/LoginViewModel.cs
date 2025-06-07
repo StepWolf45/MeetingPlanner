@@ -32,21 +32,14 @@ namespace MeetingPlanner.ViewModels
             get => _errorMessage;
             set
             {
-                // Отменяем предыдущий таймер
                 _errorMessageCts?.Cancel();
-
-                // Устанавливаем новое сообщение
                 SetProperty(ref _errorMessage, value);
-
-                // Если сообщение не пустое - запускаем таймер
                 if (!string.IsNullOrEmpty(value))
                 {
                     _errorMessageCts = new CancellationTokenSource();
                     var token = _errorMessageCts.Token;
-
                     Task.Delay(3500, token).ContinueWith(t =>
                     {
-                        // Если таймер не был отменен - очищаем сообщение
                         if (!t.IsCanceled && !token.IsCancellationRequested)
                         {
                             ErrorMessage = string.Empty;

@@ -9,6 +9,7 @@ using System.Data.Entity; // Для использования метода Incl
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Data.Entity;
 
 namespace MeetingPlanner.ViewModels
 {
@@ -26,8 +27,12 @@ namespace MeetingPlanner.ViewModels
         public ObservableCollection<User> SelectedAttendees { get; } = new ObservableCollection<User>();
         public ObservableCollection<TimeSpan> TimeSlots { get; } = new ObservableCollection<TimeSpan>();
 
-        public CalendarEvent NewEvent { get; } = new CalendarEvent();
-
+        public CalendarEvent _newEvent = new CalendarEvent();
+        public CalendarEvent NewEvent
+        {
+            get => _newEvent;
+            set => SetProperty(ref _newEvent, value);
+        }
         public DateTime SelectedDate
         {
             get => _selectedDate;
@@ -89,21 +94,68 @@ namespace MeetingPlanner.ViewModels
             get => _selectedFriend;
             set => SetProperty(ref _selectedFriend, value);
         }
-
+        private int _currentEventIndex;
+        public string EventCounterText => $"{_currentEventIndex + 1} из {SelectedEvents.Count}";
         public CalendarViewModel(DatabaseService db)
         {
+            Console.WriteLine("CalendarViewModel constructor called");
             _db = db;
             InitializeTimeSlots();
 
+            // Инициализация команд с логированием
             CreateEventCommand = new RelayCommand(CreateEvent);
             DateSelectedCommand = new RelayCommand<DateTime?>(OnDateSelected);
             CloseEventDetailsCommand = new RelayCommand(CloseEventDetails);
             AddAttendeeCommand = new RelayCommand(AddAttendee);
             RemoveAttendeeCommand = new RelayCommand<User>(RemoveAttendee);
 
-            SelectedDate = DateTime.Today;
-        }
+            // Команды для переключения между событиями с подробным логированием
+            PreviousEventCommand = new RelayCommand(
+                () =>
+                {
+                    Console.WriteLine($"Previous command executed. Index: {_currentEventIndex}");
+                    if (_currentEventIndex > 0)
+                    {
+                        _currentEventIndex--;
+                        SelectedEvent = SelectedEvents[_currentEventIndex];
+                        Console.WriteLine($"New index: {_currentEventIndex}, Event: {SelectedEvent?.Title}");
+                        OnPropertyChanged(nameof(EventCounterText));
+                        (PreviousEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                        (NextEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    }
+                },
+                () =>
+                {
+                    bool canExec = SelectedEvents.Any() && _currentEventIndex > 0;
+                    Console.WriteLine($"Previous CanExecute: {canExec} (Count: {SelectedEvents.Count}, Index: {_currentEventIndex})");
+                    return canExec;
+                }
+            );
+            NextEventCommand = new RelayCommand(
+                () =>
+                {
+                    Console.WriteLine($"NextEventCommand executed. Current index: {_currentEventIndex}");
+                    if (_currentEventIndex < SelectedEvents.Count - 1)
+                    {
+                        _currentEventIndex++;
+                        SelectedEvent = SelectedEvents[_currentEventIndex];
+                        Console.WriteLine($"New index: {_currentEventIndex}, Event: {SelectedEvent?.Title}");
+                        OnPropertyChanged(nameof(EventCounterText));
+                        (PreviousEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                        (NextEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+                    }
+                },
+                () =>
+                {
+                    bool canExec = SelectedEvents.Any() && _currentEventIndex < SelectedEvents.Count - 1;
+                    Console.WriteLine($"Next CanExecute: {canExec} (Count: {SelectedEvents.Count}, Index: {_currentEventIndex})");
+                    return canExec;
+                }
+            );
 
+            SelectedDate = DateTime.Today;
+            Console.WriteLine("CalendarViewModel initialized");
+        }
         private void InitializeTimeSlots()
         {
             for (var hour = 8; hour < 20; hour++)
@@ -121,7 +173,6 @@ namespace MeetingPlanner.ViewModels
             LoadEvents();
             LoadFriends();
         }
-
         private void OnDateSelected(DateTime? date)
         {
             if (!date.HasValue) return;
@@ -129,37 +180,25 @@ namespace MeetingPlanner.ViewModels
             SelectedDate = date.Value;
             StartDate = date.Value;
             EndDate = date.Value;
+            SelectedEvents.Clear();
             LoadEventsForSelectedDate();
         }
         private void LoadEventsForSelectedDate()
         {
             var eventsOnDate = GetEventsForDate(SelectedDate).ToList();
             SelectedEvents.Clear();
-
-            foreach (var ev in eventsOnDate)
+            foreach (var ev in eventsOnDate.OrderBy(e => e.StartTime))
             {
-                // Загружаем связанные данные для каждого события
-                var fullEvent = _db.CalendarEvents
-                    .Include(e => e.Organizer)
-                    .Include(e => e.Attendees)
-                    .Include(e => e.Invitations)
-                    .FirstOrDefault(e => e.Id == ev.Id);
-
-                SelectedEvents.Add(fullEvent ?? ev);
+                SelectedEvents.Add(ev);
             }
+
+            _currentEventIndex = SelectedEvents.Any() ? 0 : -1;
+            OnPropertyChanged(nameof(EventCounterText));
 
             if (SelectedEvents.Any())
             {
-                SelectedEvent = SelectedEvents.First();
-                if (SelectedEvent != null && SelectedEvent.Attendees != null)
-                {
-                    foreach (var attendee in SelectedEvent.Attendees)
-                    {
-                        attendee.CurrentEventStatus = GetInvitationStatus(SelectedEvent, attendee.Id);
-                    }
-                }
+                SelectedEvent = SelectedEvents[_currentEventIndex];
                 IsEventDetailsVisible = true;
-                OnPropertyChanged(nameof(CurrentInvitationStatus)); // Обновляем статус текущего пользователя
             }
             else
             {
@@ -167,21 +206,71 @@ namespace MeetingPlanner.ViewModels
                 IsEventDetailsVisible = false;
             }
 
-            NewEvent.StartTime = SelectedDate;
-            NewEvent.EndTime = SelectedDate.AddHours(1);
+            // Важно: обновляем состояние команд
+            (PreviousEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            (NextEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
         }
-
+        public void RefreshCommands()
+        {
+            (PreviousEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            (NextEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
+            Console.WriteLine("Commands refreshed");
+        }
         private void CreateEvent()
         {
+            // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(NewEvent.Title))
             {
-                MessageBox.Show("Please enter event title", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Пожалуйста, введите название события", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(NewEvent.Location))
+            {
+                MessageBox.Show("Пожалуйста, укажите локацию события", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (NewEvent.StartTime.TimeOfDay == TimeSpan.Zero)
+            {
+                MessageBox.Show("Пожалуйста, укажите время начала события", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (NewEvent.EndTime.TimeOfDay == TimeSpan.Zero)
+            {
+                MessageBox.Show("Пожалуйста, укажите время окончания события", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             if (NewEvent.EndTime <= NewEvent.StartTime)
             {
-                MessageBox.Show("End time must be after start time", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Время окончания должно быть позже времени начала", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (NewEvent.EndTime < DateTime.Now)
+            {
+                MessageBox.Show("Нельзя создать событие, которое уже полностью завершилось", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Проверка пересечения с другими событиями
+            if (HasOverlappingEvents(NewEvent))
+            {
+                var overlappingEvents = Events.Where(e =>
+                    e.StartTime.Date == NewEvent.StartTime.Date &&
+                    e.Id != NewEvent.Id &&
+                    ((NewEvent.StartTime >= e.StartTime && NewEvent.StartTime < e.EndTime) ||
+                     (NewEvent.EndTime > e.StartTime && NewEvent.EndTime <= e.EndTime) ||
+                     (NewEvent.StartTime <= e.StartTime && NewEvent.EndTime >= e.EndTime))
+                ).ToList();
+
+                var eventList = string.Join("\n", overlappingEvents.Select(e =>
+                    $"{e.Title} ({e.StartTime:HH:mm} - {e.EndTime:HH:mm})"));
+
+                MessageBox.Show($"Событие пересекается с существующими:\n{eventList}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -192,7 +281,6 @@ namespace MeetingPlanner.ViewModels
 
                 _db.CalendarEvents.Add(NewEvent);
 
-                // Создаем приглашения для всех участников
                 foreach (var attendee in SelectedAttendees)
                 {
                     var invitation = new EventInvitation
@@ -206,6 +294,8 @@ namespace MeetingPlanner.ViewModels
 
                 _db.SaveChanges();
                 Events.Add(NewEvent);
+                OnPropertyChanged(nameof(Events));
+                LoadEventsForSelectedDate();
                 ResetEventForm();
 
                 MessageBox.Show("Событие создано успешно!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -215,31 +305,64 @@ namespace MeetingPlanner.ViewModels
                 MessageBox.Show($"Ошибка при создании события: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        private bool HasOverlappingEvents(CalendarEvent newEvent)
+        {
+            // Получаем все события на ту же дату
+            var sameDayEvents = Events.Where(e =>
+                e.StartTime.Date == newEvent.StartTime.Date &&
+                e.Id != newEvent.Id).ToList();
 
+            foreach (var existingEvent in sameDayEvents)
+            {
+                // Проверяем 4 возможных варианта пересечения
+                bool startsDuring = newEvent.StartTime >= existingEvent.StartTime &&
+                                  newEvent.StartTime < existingEvent.EndTime;
+
+                bool endsDuring = newEvent.EndTime > existingEvent.StartTime &&
+                                 newEvent.EndTime <= existingEvent.EndTime;
+
+                bool surrounds = newEvent.StartTime <= existingEvent.StartTime &&
+                                newEvent.EndTime >= existingEvent.EndTime;
+
+                bool isSurrounded = newEvent.StartTime >= existingEvent.StartTime &&
+                                  newEvent.EndTime <= existingEvent.EndTime;
+
+                if (startsDuring || endsDuring || surrounds || isSurrounded)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         private void ResetEventForm()
         {
-            NewEvent.Title = string.Empty;
-            NewEvent.Description = string.Empty;
-            NewEvent.Location = string.Empty;
-            NewEvent.StartTime = SelectedDate;
-            NewEvent.EndTime = SelectedDate.AddHours(1);
+            NewEvent = new CalendarEvent
+            {
+                StartTime = SelectedDate,
+                EndTime = SelectedDate.AddHours(1)
+            };
             SelectedAttendees.Clear();
+            // OnPropertyChanged не нужен, так как SetProperty уже уведомляет об изменениях
         }
 
         public IEnumerable<CalendarEvent> GetEventsForDate(DateTime date)
         {
-            return Events.Where(e => e.StartTime.Date == date.Date)
+            return Events.Where(e => e.StartTime.Date <= date.Date && e.EndTime.Date >= date.Date)
                         .OrderBy(e => e.StartTime);
         }
-
-         public void LoadEvents()
+        public void LoadEvents()
         {
             Events.Clear();
+
+            // Загружаем события где пользователь является организатором или участником
             var events = _db.CalendarEvents
                 .Include(e => e.Organizer)
                 .Include(e => e.Attendees)
+                .Include(e => e.Invitations)
                 .Where(e => e.Organizer.Id == _currentUser.Id ||
-                           e.Attendees.Any(a => a.Id == _currentUser.Id))
+                           e.Attendees.Any(a => a.Id == _currentUser.Id) ||
+                           e.Invitations.Any(i => i.UserId == _currentUser.Id))
                 .ToList();
 
             foreach (var ev in events)
@@ -281,6 +404,8 @@ namespace MeetingPlanner.ViewModels
         public ICommand CloseEventDetailsCommand { get; }
         public ICommand AddAttendeeCommand { get; }
         public ICommand RemoveAttendeeCommand { get; }
+        public ICommand PreviousEventCommand { get; }
+        public ICommand NextEventCommand { get; }
         // CalendarViewModel.cs
         public string CurrentInvitationStatus
         {
