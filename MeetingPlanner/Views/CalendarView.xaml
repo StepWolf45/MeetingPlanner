@@ -278,7 +278,24 @@
                                       Grid.Row="1" Grid.Column="1"  FontWeight="Light" Foreground="#003153"/>
                                 </Grid>
                             </StackPanel>
-
+                            <TextBlock Text="Организатор:" FontWeight="Bold" Margin="0,0,0,5" Foreground="#003153"/>
+                            <Border Background="#F5F5F5" CornerRadius="15" Padding="5" Margin="0,0,5,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding SelectedEvent.Organizer.AvatarPath}" 
+               Width="40" Height="40" 
+               Margin="0,0,10,0">
+                                        <Image.Clip>
+                                            <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
+                                        </Image.Clip>
+                                    </Image>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SelectedEvent.Organizer.FirstName}" FontWeight="Bold" Foreground="#003153"/>
+                                        <TextBlock Text="{Binding SelectedEvent.Organizer.LastName}" FontWeight="Bold" Foreground="#003153"/>
+                                        <TextBlock Text="{Binding SelectedEvent.Organizer.Username}" FontSize="12" FontWeight="SemiBold" Foreground="#003153"/>
+                                        <TextBlock Text="Организатор" FontSize="12" FontStyle="Italic" Foreground="#003153"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                             <!-- Attendees -->
                             <TextBlock Text="Участники:" FontWeight="Bold" Margin="0,0,0,5"  Foreground="#003153"/>
                             <!-- В разделе Attendees добавьте отображение статуса -->
@@ -287,9 +304,7 @@
                                     <DataTemplate>
                                         <Border Background="#F5F5F5" CornerRadius="15" Padding="5" Margin="0,0,5,5">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="{Binding AvatarPath}" 
-                           Width="40" Height="40" 
-                           Margin="0,0,10,0">
+                                                <Image Source="{Binding AvatarPath}" Width="40" Height="40" Margin="0,0,10,0">
                                                     <Image.Clip>
                                                         <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
                                                     </Image.Clip>
@@ -299,8 +314,9 @@
                                                     <TextBlock Text="{Binding LastName}" FontWeight="Bold" Foreground="#003153"/>
                                                     <TextBlock Text="{Binding Username}" FontSize="12" FontWeight="SemiBold" Foreground="#003153"/>
                                                     <TextBlock FontSize="12" Foreground="#003153">
-                                                        <Run Text="Статус: " Foreground="#003153"/>
-                                                        <TextBlock Text="{Binding CurrentEventStatus}"/>
+                        <Run Text="Статус: "/>
+                        <Run Text="{Binding DataContext.GetInvitationStatus(SelectedEvent, Id), 
+                                  RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                                     </TextBlock>
                                                 </StackPanel>
                                             </StackPanel>
