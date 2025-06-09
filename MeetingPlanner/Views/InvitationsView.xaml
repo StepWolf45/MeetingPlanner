@@ -14,6 +14,7 @@
         </Style>
 
         <converters:StatusToStringConverter x:Key="StatusToStringConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -168,7 +169,7 @@
                     <!-- Footer -->
                     <Border Grid.Row="3" Background="#3F888F" CornerRadius="0,0,10,10" Padding="10">
                         <Button Content="Закрыть" Command="{Binding CloseEventDetailsCommand}"
-                            Style="{StaticResource PrimaryButton}" HorizontalAlignment="Right"
+                             HorizontalAlignment="Right"
                             Width="100" Margin="0"/>
                     </Border>
                 </Grid>
