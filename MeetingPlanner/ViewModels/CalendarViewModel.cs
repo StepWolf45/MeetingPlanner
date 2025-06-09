@@ -21,6 +21,15 @@ namespace MeetingPlanner.ViewModels
         private bool _isEventDetailsVisible;
         private User _selectedFriend;
 
+        private string _selectedAttendeeStatus;
+        public string SelectedAttendeeStatus
+        {
+            get => _selectedAttendeeStatus;
+            set => SetProperty(ref _selectedAttendeeStatus, value);
+        }
+
+        // Обновляйте статус при изменении SelectedEvent
+
         public ObservableCollection<CalendarEvent> SelectedEvents { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<CalendarEvent> Events { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<User> Friends { get; } = new ObservableCollection<User>();
@@ -86,7 +95,11 @@ namespace MeetingPlanner.ViewModels
         public CalendarEvent SelectedEvent
         {
             get => _selectedEvent;
-            set => SetProperty(ref _selectedEvent, value);
+            set
+            {
+                SetProperty(ref _selectedEvent, value);
+                SelectedAttendeeStatus = GetInvitationStatus(value, _currentUser?.Id ?? 0);
+            }
         }
 
         public User SelectedFriend
@@ -164,7 +177,43 @@ namespace MeetingPlanner.ViewModels
                 TimeSlots.Add(new TimeSpan(hour, 30, 0));
             }
         }
+        public string GetAttendeeStatus(CalendarEvent calendarEvent, User attendee)
+        {
+            if (calendarEvent == null || attendee == null)
+            {
+                return "Не отвечено";
+            }
 
+            // Если это организатор
+            if (calendarEvent.Organizer != null && calendarEvent.Organizer.Id == attendee.Id)
+            {
+                return "Организатор";
+            }
+
+            var invitation = _db.EventInvitations
+                .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == attendee.Id);
+
+            if (invitation == null)
+            {
+                return "Не отвечено";
+            }
+
+            switch (invitation.Status)
+            {
+                case ResponseStatus.Accepted:
+                    return "Придет";
+                case ResponseStatus.Declined:
+                    return "Не придет";
+                case ResponseStatus.Maybe:
+                    return "Возможно";
+                case ResponseStatus.Custom:
+                    return string.IsNullOrEmpty(invitation.CustomResponse)
+                        ? "Свой вариант"
+                        : invitation.CustomResponse;
+                default:
+                    return "Не отвечено";
+            }
+        }
         public void SetCurrentUser(User currentUser)
         {
             _currentUser = _db.Users

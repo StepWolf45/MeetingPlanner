@@ -287,9 +287,7 @@
                                     <DataTemplate>
                                         <Border Background="#F5F5F5" CornerRadius="15" Padding="5" Margin="0,0,5,5">
                                             <StackPanel Orientation="Horizontal">
-                                                <Image Source="{Binding AvatarPath}" 
-                           Width="40" Height="40" 
-                           Margin="0,0,10,0">
+                                                <Image Source="{Binding AvatarPath}" Width="40" Height="40" Margin="0,0,10,0">
                                                     <Image.Clip>
                                                         <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
                                                     </Image.Clip>
@@ -299,8 +297,10 @@
                                                     <TextBlock Text="{Binding LastName}" FontWeight="Bold" Foreground="#003153"/>
                                                     <TextBlock Text="{Binding Username}" FontSize="12" FontWeight="SemiBold" Foreground="#003153"/>
                                                     <TextBlock FontSize="12" Foreground="#003153">
-                                                        <Run Text="Статус: " Foreground="#003153"/>
-                                                        <TextBlock Text="{Binding CurrentEventStatus}"/>
+                        <Run Text="Статус: "/>
+                        <Run Text="{Binding DataContext.SelectedAttendeeStatus, 
+                             RelativeSource={RelativeSource AncestorType=UserControl},
+                             Mode=OneWay}"/>
                                                     </TextBlock>
                                                 </StackPanel>
                                             </StackPanel>

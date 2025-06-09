@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Models;
 using MeetingPlanner.Services;
+using System.Data.Entity;
 
 namespace MeetingPlanner.ViewModels
 {
@@ -18,19 +20,51 @@ namespace MeetingPlanner.ViewModels
         private User _currentUser;
 
         public ObservableCollection<EventInvitation> PendingInvitations { get; } = new ObservableCollection<EventInvitation>();
+        private CalendarEvent _selectedInvitationEvent;
+        public CalendarEvent SelectedInvitationEvent
+        {
+            get => _selectedInvitationEvent;
+            set => SetProperty(ref _selectedInvitationEvent, value);
+        }
 
+        private bool _isInvitationEventVisible;
+        public bool IsInvitationEventVisible
+        {
+            get => _isInvitationEventVisible;
+            set => SetProperty(ref _isInvitationEventVisible, value);
+        }
+
+        public ICommand ViewEventCommand { get; }
+
+
+
+        private void ViewEventDetails(CalendarEvent calendarEvent)
+        {
+            if (calendarEvent == null) return;
+
+            SelectedInvitationEvent = _db.CalendarEvents
+                .Include(e => e.Organizer)
+                .Include(e => e.Attendees)
+                .Include(e => e.Invitations)
+                .FirstOrDefault(e => e.Id == calendarEvent.Id);
+
+            IsInvitationEventVisible = true;
+        }
         public InvitationsViewModel(DatabaseService db)
         {
             _db = db;
             RespondCommand = new RelayCommand<EventInvitation>(RespondToInvitation);
+            ViewEventCommand = new RelayCommand<CalendarEvent>(ViewEventDetails);
         }
-
         public void SetCurrentUser(User currentUser)
         {
             _currentUser = currentUser;
             LoadInvitations();
         }
-
+        public ICommand CloseEventDetailsCommand => new RelayCommand(() =>
+        {
+            IsInvitationEventVisible = false;
+        });
         private void LoadInvitations()
         {
             PendingInvitations.Clear();
