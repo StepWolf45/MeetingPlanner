@@ -136,7 +136,7 @@
                            FontSize="14"
                            Padding="0,0,0,5"/>
 
-                    <ListBox ItemsSource="{Binding PendingRequests}" Height="150">
+                    <ListBox ItemsSource="{Binding PendingRequests}" Height="86">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" Margin="5">

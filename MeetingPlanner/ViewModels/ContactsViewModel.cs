@@ -150,7 +150,6 @@ namespace MeetingPlanner.ViewModels
                 return;
             }
 
-            // Получаем пользователей
             var sender = _db.Users.FirstOrDefault(u => u.Id == CurrentFriendRequest.SenderId);
             var receiver = _db.Users.FirstOrDefault(u => u.Id == CurrentFriendRequest.ReceiverId);
 
@@ -160,14 +159,13 @@ namespace MeetingPlanner.ViewModels
                 return;
             }
 
-            // Проверяем существование тегов
+
             var existingTagForCurrentUser = _db.FriendTags.FirstOrDefault(ft =>
                 ft.OwnerId == CurrentUser.Id && ft.FriendId == sender.Id);
 
             var existingTagForFriend = _db.FriendTags.FirstOrDefault(ft =>
                 ft.OwnerId == sender.Id && ft.FriendId == CurrentUser.Id);
 
-            // Обновляем или создаем теги
             if (existingTagForCurrentUser != null)
             {
                 existingTagForCurrentUser.TagName = CurrentTagText;
@@ -200,7 +198,7 @@ namespace MeetingPlanner.ViewModels
                 });
             }
 
-            // Добавляем в друзья, если еще не добавлены
+
             if (!CurrentUser.Friends.Any(f => f.Id == sender.Id))
             {
                 CurrentUser.Friends.Add(sender);
@@ -211,11 +209,11 @@ namespace MeetingPlanner.ViewModels
                 sender.Friends.Add(CurrentUser);
             }
 
-            // Сохраняем изменения
+
             await _db.SaveChangesAsync();
             IsTagPopupOpen = false;
 
-            // Обновляем данные
+     
             LoadFriends();
             LoadPendingRequests();
             RefreshSearchResults();

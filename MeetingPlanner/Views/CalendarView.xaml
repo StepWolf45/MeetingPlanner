@@ -6,7 +6,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:converters="clr-namespace:MeetingPlanner.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="700" d:DesignWidth="900">
+             d:DesignHeight="600" d:DesignWidth="900">
 
     <UserControl.Resources>
         <DropShadowEffect x:Key="ShadowEffect" BlurRadius="10" ShadowDepth="3" Opacity="0.2"/>
@@ -40,7 +40,6 @@
             <ColumnDefinition Width="300"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Calendar -->
         <Calendar Grid.Column="0" Margin="10"
                   SelectedDate="{Binding SelectedDate, Mode=TwoWay}"
                   DisplayDate="{Binding SelectedDate}"
@@ -50,12 +49,10 @@
                 <Style TargetType="CalendarDayButton">
                     <Setter Property="Background" Value="Transparent"/>
                     <Style.Triggers>
-                        <!-- Selected date -->
                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
                             <Setter Property="Background" Value="LightBlue"/>
                         </DataTrigger>
 
-                        <!-- Dates with events -->
                         <DataTrigger Value="True">
                             <DataTrigger.Binding>
                                 <MultiBinding Converter="{StaticResource HasEventConverter}">
@@ -68,8 +65,7 @@
                             <Setter Property="ToolTip">
                                 <Setter.Value>
                                     <ToolTip>
-                                        <ItemsControl ItemsSource="{Binding DataContext.GetEventsForDate(Date),
-                                                                 RelativeSource={RelativeSource AncestorType=Calendar}}">
+                                        <ItemsControl >
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
                                                     <StackPanel Margin="5">
@@ -100,7 +96,6 @@
             </Calendar.LayoutTransform>
         </Calendar>
 
-        <!-- Event Form -->
         <Border Grid.Column="1" Background="#3F888F" Padding="15">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel>
@@ -208,20 +203,18 @@
         Visibility="{Binding IsEventDetailsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Border Background="#AFEEEE" Padding="0" CornerRadius="10" Width="400" MaxHeight="500"
             BorderThickness="1" BorderBrush="#E0E0E0"
-            Effect="{StaticResource ShadowEffect}">
+            Effect="{StaticResource ShadowEffect}" Height="528" Margin="230,0,230,0" VerticalAlignment="Top">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
-                    <!-- Header -->
                     <!-- Header -->
                     <Border Background="#0E294B" CornerRadius="10,10,0,0" Padding="15">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button Content="&lt;" Command="{Binding PreviousEventCommand}" 
-                        Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/>
+                        Style="{StaticResource PrimaryButton}" Margin="10,0,70,0"/>
                                     <StackPanel>
                                         <TextBlock Text="{Binding SelectedEvent.Title}" 
                                Foreground="White" 
@@ -236,7 +229,7 @@
                                Margin="0,5,0,0"/>
                                     </StackPanel>
                             <Button Content="&gt;" Command="{Binding NextEventCommand}" 
-                        Style="{StaticResource PrimaryButton}" Margin="10,0,0,0"/>
+                        Style="{StaticResource PrimaryButton}" Margin="70,0,0,0"/>
                         </StackPanel>
                     </Border>
 
@@ -279,8 +272,23 @@
                                       Grid.Row="1" Grid.Column="1"  FontWeight="Light" Foreground="#003153"/>
                                 </Grid>
                             </StackPanel>
-
-                            <!-- Attendees -->
+                            <TextBlock Text="Организатор:" FontWeight="Bold" Margin="0,10,0,5" Foreground="#003153"/>
+                            <Border Background="#F5F5F5" CornerRadius="15" Padding="5" Margin="0,0,5,15">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="{Binding SelectedEvent.Organizer.AvatarPath}" 
+                                       Width="40" Height="40" Margin="0,0,10,0">
+                                        <Image.Clip>
+                                            <EllipseGeometry RadiusX="16" RadiusY="16" Center="16,16"/>
+                                        </Image.Clip>
+                                    </Image>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SelectedEvent.Organizer.FirstName}" 
+                                              FontWeight="Bold" Foreground="#003153"/>
+                                        <TextBlock Text="{Binding SelectedEvent.Organizer.LastName}" 
+                                              FontWeight="Bold" Foreground="#003153"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                             <!-- Attendees -->
                             <TextBlock Text="Участники:" FontWeight="Bold" Margin="0,0,0,5" Foreground="#003153"/>
                             <ItemsControl ItemsSource="{Binding SelectedEvent.Attendees}" Margin="5,0,0,0">

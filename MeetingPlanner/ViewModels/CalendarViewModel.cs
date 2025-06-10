@@ -91,12 +91,11 @@ namespace MeetingPlanner.ViewModels
                 SetProperty(ref _selectedEvent, value);
                 if (value != null)
                 {
-                    // Обновляем статусы для всех участников
                     foreach (var attendee in value.Attendees)
                     {
                         attendee.CurrentEventStatus = GetAttendeeStatus(value, attendee);
                     }
-                    OnPropertyChanged(nameof(SelectedEvent)); // Force refresh UI
+                    OnPropertyChanged(nameof(SelectedEvent));
 
                 }
                 OnPropertyChanged(nameof(SelectedEvent));
@@ -170,10 +169,10 @@ namespace MeetingPlanner.ViewModels
         }
         private void InitializeTimeSlots()
         {
-            for (var hour = 8; hour < 20; hour++)
+            for (var hour = 0; hour < 25; hour++)
             {
                 TimeSlots.Add(new TimeSpan(hour, 0, 0));
-                TimeSlots.Add(new TimeSpan(hour, 30, 0));
+                TimeSlots.Add(new TimeSpan(hour, 20, 0));
             }
         }
         public string GetAttendeeStatus(CalendarEvent calendarEvent, User attendee)
@@ -182,8 +181,6 @@ namespace MeetingPlanner.ViewModels
             {
                 return "Не отвечено";
             }
-
-            // Если это организатор
             if (calendarEvent.Organizer != null && calendarEvent.Organizer.Id == attendee.Id)
             {
                 return "Организатор";
@@ -361,16 +358,16 @@ namespace MeetingPlanner.ViewModels
             foreach (var existingEvent in sameDayEvents)
             {
                 bool startsDuring = newEvent.StartTime >= existingEvent.StartTime &&
-                                  newEvent.StartTime < existingEvent.EndTime;
+                                    newEvent.StartTime < existingEvent.EndTime;
 
                 bool endsDuring = newEvent.EndTime > existingEvent.StartTime &&
-                                 newEvent.EndTime <= existingEvent.EndTime;
+                                  newEvent.EndTime <= existingEvent.EndTime;
 
                 bool surrounds = newEvent.StartTime <= existingEvent.StartTime &&
-                                newEvent.EndTime >= existingEvent.EndTime;
+                                 newEvent.EndTime >= existingEvent.EndTime;
 
                 bool isSurrounded = newEvent.StartTime >= existingEvent.StartTime &&
-                                  newEvent.EndTime <= existingEvent.EndTime;
+                                    newEvent.EndTime <= existingEvent.EndTime;
 
                 if (startsDuring || endsDuring || surrounds || isSurrounded)
                 {
