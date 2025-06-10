@@ -14,7 +14,6 @@
         </Style>
 
         <converters:StatusToStringConverter x:Key="StatusToStringConverter"/>
-        <converters:InvitationResponseConverter x:Key="InvitationResponseConverter"/>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
 
@@ -58,32 +57,37 @@
                                         <Run Text="{Binding Status, Converter={StaticResource StatusToStringConverter}}"/>
                                     </TextBlock>
 
-                                    <StackPanel Orientation="Horizontal"
-            Margin="0,10"
-            HorizontalAlignment="Center">
-                                        <Button Content="Посмотреть"
-            Command="{Binding DataContext.ViewEventCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CommandParameter="{Binding Event}"
-            Margin="0,0,5,0"
-            Width="100"
-            Style="{StaticResource PrimaryButtonStyle}"/>
-                                        <Button Content="Приду"
-            Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CommandParameter="{Binding ., Converter={StaticResource InvitationResponseConverter}, ConverterParameter=Accepted}"
-            Margin="0,0,5,0"
-            Width="80"
-            Style="{StaticResource PrimaryButtonStyle}"/>
-                                        <Button Content="Не приду"
-            Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CommandParameter="{Binding ., Converter={StaticResource InvitationResponseConverter}, ConverterParameter=Declined}"
-            Margin="0,0,5,0"
-            Width="80"
-            Style="{StaticResource PrimaryButtonStyle}"/>
-                                        <Button Content="Возможно"
-            Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-            CommandParameter="{Binding ., Converter={StaticResource InvitationResponseConverter}, ConverterParameter=Maybe}"
-            Width="80"
-            Style="{StaticResource PrimaryButtonStyle}"/>
+                                    <StackPanel Orientation="Horizontal" 
+                                                Margin="0,10"
+                                                HorizontalAlignment="Center">
+                                        <Button Content="Посмотреть" 
+                                            Command="{Binding DataContext.ViewEventCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding Event}"
+                                            Margin="0,0,5,0"
+                                            Width="100"
+                                            Style="{StaticResource PrimaryButtonStyle}"/>
+                                        <Button Content="Приду" 
+                                                Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Tag="Accepted"
+                                                Margin="0,0,5,0"
+                                                Width="80"
+                                                Style="{StaticResource PrimaryButtonStyle}"/>
+
+                                        <Button Content="Не приду" 
+                                                Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Tag="Declined"
+                                                Margin="0,0,5,0"
+                                                Width="80"
+                                                Style="{StaticResource PrimaryButtonStyle}"/>
+
+                                        <Button Content="Возможно" 
+                                                Command="{Binding DataContext.RespondCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Tag="Maybe"
+                                                Width="80"
+                                                Style="{StaticResource PrimaryButtonStyle}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>

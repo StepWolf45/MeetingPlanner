@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Windows.Media;
 
 namespace MeetingPlanner.Models
 {
-    public class User
+    public class User : ObservableObject, INotifyPropertyChanged
     {
 
         [Key]
@@ -34,8 +36,9 @@ namespace MeetingPlanner.Models
 
         [NotMapped]
         public Brush FriendStatusColor { get; set; }
-        [NotMapped] 
+        [NotMapped]
         public string CurrentEventStatus { get; set; }
+
         public virtual ICollection<FriendRequest> SentFriendRequests { get; set; }
         public virtual ICollection<FriendRequest> ReceivedFriendRequests { get; set; }
         public virtual ICollection<FriendTag> FriendTags { get; set; }

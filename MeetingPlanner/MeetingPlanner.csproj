@@ -113,6 +113,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Services\InvitationResponseConverter.cs" />
+    <Compile Include="Services\StatusToColorConverter.cs" />
     <Compile Include="Services\StatusToStringConverter.cs" />
     <Compile Include="Services\InitialsConverter.cs" />
     <Compile Include="Converters\NullToVisibilityConverter.cs" />

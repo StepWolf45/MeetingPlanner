@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using MeetingPlanner.Models;
 using MeetingPlanner.Services;
 using System.Data.Entity;
+using MeetingPlanner.Converters;
 
 namespace MeetingPlanner.ViewModels
 {
@@ -53,7 +54,8 @@ namespace MeetingPlanner.ViewModels
         public InvitationsViewModel(DatabaseService db)
         {
             _db = db;
-            RespondCommand = new RelayCommand<EventInvitation>(RespondToInvitation);
+
+            RespondCommand = new RelayCommand<InvitationResponse>(RespondToInvitation);
             ViewEventCommand = new RelayCommand<CalendarEvent>(ViewEventDetails);
         }
         public void SetCurrentUser(User currentUser)
@@ -83,55 +85,58 @@ namespace MeetingPlanner.ViewModels
             }
         }
 
-        private void RespondToInvitation(EventInvitation invitation)
+        private void RespondToInvitation(InvitationResponse response)
         {
-            if (invitation == null) return;
+            if (response == null || response.Invitation == null) return;
 
-            var button = FindButtonByCommand();
-            if (button != null && button.Tag is string tag)
+            var invitation = response.Invitation;
+            var tag = response.Tag;
+
+            switch (tag)
             {
-                switch (tag)
-                {
-                    case "Accepted":
-                        invitation.Status = ResponseStatus.Accepted;
-                        break;
-                    case "Declined":
-                        invitation.Status = ResponseStatus.Declined;
-                        break;
-                    case "Maybe":
-                        invitation.Status = ResponseStatus.Maybe;
-                        break;
-                }
+                case "Accepted":
+                    invitation.Status = ResponseStatus.Accepted;
+                    break;
+                case "Declined":
+                    invitation.Status = ResponseStatus.Declined;
+                    break;
+                case "Maybe":
+                    invitation.Status = ResponseStatus.Maybe;
+                    break;
+            }
 
-                invitation.ResponseDate = DateTime.Now;
-                _db.SaveChanges();
+            invitation.ResponseDate = DateTime.Now;
+            _db.SaveChanges();
 
-                string responseMessage;
-                switch (tag)
-                {
-                    case "Accepted":
-                        responseMessage = "Вы подтвердили участие";
-                        break;
-                    case "Declined":
-                        responseMessage = "Вы отказались от участия";
-                        break;
-                    case "Maybe":
-                        responseMessage = "Вы ответили 'Возможно'";
-                        break;
-                    default:
-                        responseMessage = "Ответ сохранен";
-                        break;
-                }
+            string responseMessage;
+            switch (tag)
+            {
+                case "Accepted":
+                    responseMessage = "Вы подтвердили участие";
+                    break;
+                case "Declined":
+                    responseMessage = "Вы отказались от участия";
+                    break;
+                case "Maybe":
+                    responseMessage = "Вы ответили 'Возможно'";
+                    break;
+                default:
+                    responseMessage = "Ответ сохранен";
+                    break;
+            }
 
-                MessageBox.Show(responseMessage, "Спасибо за ответ!", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(responseMessage, "Спасибо за ответ!", MessageBoxButton.OK, MessageBoxImage.Information);
 
-                LoadInvitations();
+            LoadInvitations();
 
-                var mainWindow = Application.Current.MainWindow;
-                if (mainWindow?.DataContext is HomeViewModel homeViewModel)
-                {
-                    homeViewModel.CalendarViewModel.LoadEvents();
-                }
+            var mainWindow = Application.Current.MainWindow;
+            if (mainWindow?.DataContext is HomeViewModel homeViewModel)
+            {
+                homeViewModel.CalendarViewModel.LoadEvents();
+                homeViewModel.CalendarViewModel.LoadEventsForSelectedDate();
+                CalendarEvent temp = homeViewModel.CalendarViewModel.SelectedEvent;
+                homeViewModel.CalendarViewModel.SelectedEvent = null;
+                homeViewModel.CalendarViewModel.SelectedEvent = temp;
             }
         }
         private Button FindButtonByCommand()
@@ -159,6 +164,6 @@ namespace MeetingPlanner.ViewModels
             return null;
         }
 
-        public IRelayCommand<EventInvitation> RespondCommand { get; }
+        public IRelayCommand<InvitationResponse> RespondCommand { get; }
     }
 }

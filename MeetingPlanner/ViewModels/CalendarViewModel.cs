@@ -1,14 +1,15 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using MeetingPlanner.Models;
-using MeetingPlanner.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.Entity; // Для использования метода Include
+using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.ComponentModel;
+using MeetingPlanner.Models;
+using MeetingPlanner.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace MeetingPlanner.ViewModels
 {
@@ -19,15 +20,6 @@ namespace MeetingPlanner.ViewModels
         private DateTime _selectedDate;
         private bool _isEventDetailsVisible;
         private User _selectedFriend;
-
-        private string _selectedAttendeeStatus;
-        public string SelectedAttendeeStatus
-        {
-            get => _selectedAttendeeStatus;
-            set => SetProperty(ref _selectedAttendeeStatus, value);
-        }
-
-        // Обновляйте статус при изменении SelectedEvent
 
         public ObservableCollection<CalendarEvent> SelectedEvents { get; } = new ObservableCollection<CalendarEvent>();
         public ObservableCollection<CalendarEvent> Events { get; } = new ObservableCollection<CalendarEvent>();
@@ -97,7 +89,17 @@ namespace MeetingPlanner.ViewModels
             set
             {
                 SetProperty(ref _selectedEvent, value);
-                SelectedAttendeeStatus = GetInvitationStatus(value, _currentUser?.Id ?? 0);
+                if (value != null)
+                {
+                    // Обновляем статусы для всех участников
+                    foreach (var attendee in value.Attendees)
+                    {
+                        attendee.CurrentEventStatus = GetAttendeeStatus(value, attendee);
+                    }
+                    OnPropertyChanged(nameof(SelectedEvent)); // Force refresh UI
+
+                }
+                OnPropertyChanged(nameof(SelectedEvent));
             }
         }
 
@@ -114,14 +116,12 @@ namespace MeetingPlanner.ViewModels
             _db = db;
             InitializeTimeSlots();
 
-            // Инициализация команд с логированием
             CreateEventCommand = new RelayCommand(CreateEvent);
             DateSelectedCommand = new RelayCommand<DateTime?>(OnDateSelected);
             CloseEventDetailsCommand = new RelayCommand(CloseEventDetails);
             AddAttendeeCommand = new RelayCommand(AddAttendee);
             RemoveAttendeeCommand = new RelayCommand<User>(RemoveAttendee);
 
-            // Команды для переключения между событиями с подробным логированием
             PreviousEventCommand = new RelayCommand(
                 () =>
                 {
@@ -190,6 +190,8 @@ namespace MeetingPlanner.ViewModels
             }
 
             var invitation = _db.EventInvitations
+                .Include(i => i.Event)
+                .Include(i => i.User)
                 .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == attendee.Id);
 
             if (invitation == null)
@@ -216,7 +218,7 @@ namespace MeetingPlanner.ViewModels
         public void SetCurrentUser(User currentUser)
         {
             _currentUser = _db.Users
-                .Include(u => u.Friends)  // Make sure to add using Microsoft.EntityFrameworkCore;
+                .Include(u => u.Friends)
                 .FirstOrDefault(u => u.Id == currentUser.Id);
             LoadEvents();
             LoadFriends();
@@ -231,7 +233,7 @@ namespace MeetingPlanner.ViewModels
             SelectedEvents.Clear();
             LoadEventsForSelectedDate();
         }
-        private void LoadEventsForSelectedDate()
+        public void LoadEventsForSelectedDate()
         {
             var eventsOnDate = GetEventsForDate(SelectedDate).ToList();
             SelectedEvents.Clear();
@@ -254,7 +256,6 @@ namespace MeetingPlanner.ViewModels
                 IsEventDetailsVisible = false;
             }
 
-            // Важно: обновляем состояние команд
             (PreviousEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
             (NextEventCommand as RelayCommand)?.NotifyCanExecuteChanged();
         }
@@ -266,7 +267,6 @@ namespace MeetingPlanner.ViewModels
         }
         private void CreateEvent()
         {
-            // Проверка обязательных полей
             if (string.IsNullOrWhiteSpace(NewEvent.Title))
             {
                 MessageBox.Show("Пожалуйста, введите название события", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -303,7 +303,6 @@ namespace MeetingPlanner.ViewModels
                 return;
             }
 
-            // Проверка пересечения с другими событиями
             if (HasOverlappingEvents(NewEvent))
             {
                 var overlappingEvents = Events.Where(e =>
@@ -355,14 +354,12 @@ namespace MeetingPlanner.ViewModels
         }
         private bool HasOverlappingEvents(CalendarEvent newEvent)
         {
-            // Получаем все события на ту же дату
             var sameDayEvents = Events.Where(e =>
                 e.StartTime.Date == newEvent.StartTime.Date &&
                 e.Id != newEvent.Id).ToList();
 
             foreach (var existingEvent in sameDayEvents)
             {
-                // Проверяем 4 возможных варианта пересечения
                 bool startsDuring = newEvent.StartTime >= existingEvent.StartTime &&
                                   newEvent.StartTime < existingEvent.EndTime;
 
@@ -391,7 +388,6 @@ namespace MeetingPlanner.ViewModels
                 EndTime = SelectedDate.AddHours(1)
             };
             SelectedAttendees.Clear();
-            // OnPropertyChanged не нужен, так как SetProperty уже уведомляет об изменениях
         }
 
         public IEnumerable<CalendarEvent> GetEventsForDate(DateTime date)
@@ -403,7 +399,6 @@ namespace MeetingPlanner.ViewModels
         {
             Events.Clear();
 
-            // Загружаем события где пользователь является организатором или участником
             var events = _db.CalendarEvents
                 .Include(e => e.Organizer)
                 .Include(e => e.Attendees)
@@ -454,91 +449,5 @@ namespace MeetingPlanner.ViewModels
         public ICommand RemoveAttendeeCommand { get; }
         public ICommand PreviousEventCommand { get; }
         public ICommand NextEventCommand { get; }
-        // CalendarViewModel.cs
-        public string CurrentInvitationStatus
-        {
-            get
-            {
-                if (SelectedEvent == null || _currentUser == null)
-                    return string.Empty;
-
-                var invitation = _db.EventInvitations
-                    .FirstOrDefault(i => i.EventId == SelectedEvent.Id && i.UserId == _currentUser.Id);
-
-                if (invitation == null) return "Не отвечено";
-
-                switch (invitation.Status)
-                {
-                    case ResponseStatus.Accepted: return "Вы придете";
-                    case ResponseStatus.Declined: return "Вы не придете";
-                    case ResponseStatus.Maybe: return "Вы возможно придете";
-                    case ResponseStatus.Custom: return "Ваш ответ: " + (invitation.CustomResponse ?? "Свой вариант");
-                    default: return "Вы не ответили";
-                }
-            }
-        }
-        public string GetInvitationStatus(CalendarEvent calendarEvent, int userId)
-        {
-            if (calendarEvent == null)
-            {
-                return "Не отвечено";
-            }
-
-            // Получаем приглашение из базы данных
-            var invitation = _db.EventInvitations
-                .FirstOrDefault(i => i.EventId == calendarEvent.Id && i.UserId == userId);
-
-            // Проверяем, является ли текущий пользователь организатором события
-            bool isOrganizer = calendarEvent.Organizer?.Id == _currentUser.Id;
-
-            if (isOrganizer)
-            {
-                // Логика для организатора
-                if (invitation == null)
-                {
-                    return "Не отвечено";
-                }
-
-                switch (invitation.Status)
-                {
-                    case ResponseStatus.Accepted:
-                        return "Придет";
-                    case ResponseStatus.Declined:
-                        return "Не придет";
-                    case ResponseStatus.Maybe:
-                        return "Возможно";
-                    case ResponseStatus.Custom:
-                        return !string.IsNullOrEmpty(invitation.CustomResponse)
-                            ? invitation.CustomResponse
-                            : "Свой вариант";
-                    default:
-                        return "Не отвечено";
-                }
-            }
-            else
-            {
-                // Логика для участника
-                if (invitation == null)
-                {
-                    return "Вы не ответили";
-                }
-
-                switch (invitation.Status)
-                {
-                    case ResponseStatus.Accepted:
-                        return "Вы придете";
-                    case ResponseStatus.Declined:
-                        return "Вы не придете";
-                    case ResponseStatus.Maybe:
-                        return "Вы возможно придете";
-                    case ResponseStatus.Custom:
-                        return "Ваш ответ: " + (!string.IsNullOrEmpty(invitation.CustomResponse)
-                            ? invitation.CustomResponse
-                            : "Свой вариант");
-                    default:
-                        return "Вы не ответили";
-                }
-            }
-        }
     }
 }
